@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS= -Wall -O3 --std=c++11
 
-RNDDIR=/home/tommaso/LSN/Parallel_number_generator_20250306/
+RNDDIR=../Parallel_number_generator_20250306/
 
 LOCAL_EXECUTABLES:= es101 es102 es103 es120
 

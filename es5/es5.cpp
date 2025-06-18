@@ -16,13 +16,11 @@ vector<double> metropolis(
 	const vector <double> x0, 
 	prob p, 
 	Random& rnd, double sigma,
-	string flag="gauss",
-	bool verbose=false
+	string flag="gauss"//,
+	//float &acceptance_rate=NULL
 )
 {
-
 	vector<double> x (3); 
-
 
 	// generate new point using flag distribution
 	if ((flag=="gauss") || (flag=="Gauss") || (flag=="GAUSS"))
@@ -44,8 +42,6 @@ vector<double> metropolis(
 		x[1] = rnd.Rannyu(x0[1]- sigma, x0[1]+sigma);
 		x[2] = rnd.Rannyu(x0[2]- sigma, x0[2]+sigma);		
 	}
-
-
 
 	double alpha =p(x)/p(x0);//min(1., p(x)/p(x0)); //both distribution are simmetric
 	//accept/ reject
@@ -99,7 +95,7 @@ void compute_orbital_ray(
 	//vector of throws
 	vector<int> thr(nblocks);
 	iota(thr.begin(), thr.end(), 0);
-	vector<double> x=x0;
+	vector<double> x(x0);
 	
 	ofstream out("data/"+position_file);
 	
@@ -116,16 +112,14 @@ void compute_orbital_ray(
 		double sum=0;
 		for(int j=0; j<nthr; ++j)
 		{
-			x = metropolis(x, p, rnd, sigma, initial_distribution); //gauss for 1s
+			x = metropolis(x, p, rnd, sigma, initial_distribution); 
 			
 			//print points on file
 			out<<j<<","<<x[0]<<","<<x[1]<<","<<x[2]<<endl;
 
-
 			sum+=norm(x);
-			avg[N]=sum/nthr;
 		}
-
+		avg[N]=sum/nthr;
 		av2[N]=avg[N]*avg[N];
 		
 		
@@ -147,7 +141,7 @@ void compute_orbital_ray(
 		progress(N, nblocks, 40);
 
 	}
-	cout<<endl;		
+	cout<<endl<<endl;		
 	out.close();
 	for(int &el: thr )
 	{
@@ -169,7 +163,12 @@ int main(int argc, char* argv[])
 	int nblocks=100;
 	int nthrows=1000000;
 	
+	
 	cout<<"\n\t\t--> Computing 1s orbital <--\n"<<endl;
+	compute_orbital_ray(
+		p_1s, x0, "pos_1s_unif.csv", "ray_1s_unif.csv", 
+		"uniform", 0.5, nblocks, nthrows
+	);
 	compute_orbital_ray(
 		p_1s, x0, "pos_1s_gauss.csv", "ray_1s_gauss.csv", 
 		"gauss", 0.5, nblocks, nthrows
@@ -178,26 +177,16 @@ int main(int argc, char* argv[])
 	cout<<"\n\t\t--> Computing 2p m=0 orbital <--\n"<<endl;
 	x0={1., 1., 1.};
 	compute_orbital_ray(
+		p_2p, x0, "pos_2p_unif.csv", "ray_2p_unif.csv", 
+		"uniform", 0.5, nblocks, nthrows
+	);
+	compute_orbital_ray(
 		p_2p, x0, "pos_2p_gauss.csv", "ray_2p_gauss.csv", 
 		"gauss", 0.5, nblocks, nthrows
 	);
 	
-	cout<<"\n\nUniform initial distribution"<<endl;
 	
-	cout<<"\n\t\t--> Computing 1s orbital <--\n"<<endl;
-	compute_orbital_ray(
-		p_1s, x0, "pos_1s_uniform.csv", "ray_1s_uniform.csv", 
-		"uniform", 0.5, nblocks, nthrows
-	);
-
-	cout<<"\n\t\t--> Computing 2p m=0 orbital <--\n"<<endl;
-	x0={1., 1., 1.};
-	compute_orbital_ray(
-		p_2p, x0, "pos_2p_uniform.csv", "ray_2p_uniform.csv", 
-		"uniform", 0.5, nblocks, nthrows
-	);
-
-
+	//other distributions
 
 	cout<<"\n\t\t--> Computing 2p m=1 orbital <--\n"<<endl;
 	x0={1., 1., 1.};

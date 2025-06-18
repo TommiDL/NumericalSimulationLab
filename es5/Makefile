@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS= -Wall -O3 --std=c++11 -g
 
-RNDDIR=/home/tommaso/LSN/Parallel_number_generator_20250306/
+RNDDIR=../Parallel_number_generator_20250306/
 
 LOCAL_EXECUTABLES:= es5
 
@@ -17,7 +17,7 @@ headers= ../es1/func.h $(RNDDIR)random.h probability.h
 
 es5: es5.o $(objects)
 	mkdir -p data
-	$(CC)  -fsanitize=address -o es5 es5.o $(objects) 
+	$(CC) -o es5 es5.o $(objects) 
 
 %.o: %.cpp $(header)
 	$(CC) -c $< -o $@ $(CFLAGS)

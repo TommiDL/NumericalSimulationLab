@@ -5,8 +5,8 @@ NPART                  108
 RHO                    0.05
 R_CUT                  5.0
 DELTA                  0.001
-NBLOCKS                200
-NSTEPS                 200
-DISTRIBUTION	       1
+NBLOCKS                20
+NSTEPS                 2000
+DISTRIBUTION	       0
 
 ENDINPUT

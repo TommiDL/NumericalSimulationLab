@@ -40,7 +40,6 @@ int main (int argc, char *argv[]){
     int nb=SYS.get_nbl();
 
 
-    cout<<"\t["<<setw(20)<<"]";
       
     for(int i=0; i < SYS.get_nbl(); i++){ //loop over blocks
 

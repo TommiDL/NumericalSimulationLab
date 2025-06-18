@@ -10,16 +10,10 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 
 #include <iostream>
 #include "system.h"
+#include "function.h"
+
 
 using namespace std;
-
-void progress(int block, int nblock, int barlenght=30)
-{
-	int l=barlenght*float(block)/nblock;
-	string str="[";
-	for (int b=0; b<l; b++) str+="|";
-	cout<<"\r"<<str<<setw(barlenght-l+1)<<"]["<<100*l/float(barlenght)<<"%]"<<flush;
-} 
 
 int main (int argc, char *argv[]){
 
@@ -32,7 +26,6 @@ int main (int argc, char *argv[]){
   //cout<<"sym started"<<endl;
   //float perc=0;
   cout<<"Simulation Started"<<endl;
-  cout<<"["<<setw(20)<<"]";
     
   for(int i=0; i < SYS.get_nbl(); i++){ //loop over blocks
 
@@ -50,7 +43,8 @@ int main (int argc, char *argv[]){
     progress(i, nb);
 
   }
-  cout<<endl<<endl;
+  cout<<RESET<<endl<<endl;
+
   SYS.finalize();
   return 0;
 }

@@ -265,62 +265,59 @@ void System :: initialize_velocities(){
 	      sumv(0) += vx(i); //compute drift velocity
 	      sumv(1) += vy(i);
 	      sumv(2) += vz(i);
-	}
+	    }
 	
-	for (int idim=0; idim<_ndim; idim++) sumv(idim) = sumv(idim)/double(_npart);
-	double sumv2 = 0.0, scalef;
-	for (int i=0; i<_npart; i++){
-		vx(i) = vx(i) - sumv(0); //subtract drift velocity per particle
-		vy(i) = vy(i) - sumv(1);
-		vz(i) = vz(i) - sumv(2);
-		sumv2 += vx(i) * vx(i) + vy(i) * vy(i) + vz(i) * vz(i);
-	}
-	sumv2 /= double(_npart);
-	scalef = sqrt(3.0 * _temp / sumv2);   // velocity scale factor 
-	for (int i=0; i<_npart; i++){
-		_particle(i).setvelocity(0, vx(i)*scalef);
-		_particle(i).setvelocity(1, vy(i)*scalef);
-		_particle(i).setvelocity(2, vz(i)*scalef);
-	}
+      for (int idim=0; idim<_ndim; idim++) sumv(idim) = sumv(idim)/double(_npart);
+      double sumv2 = 0.0, scalef;
+      for (int i=0; i<_npart; i++){
+        vx(i) = vx(i) - sumv(0); //subtract drift velocity per particle
+        vy(i) = vy(i) - sumv(1);
+        vz(i) = vz(i) - sumv(2);
+        sumv2 += vx(i) * vx(i) + vy(i) * vy(i) + vz(i) * vz(i);
+      }
+      sumv2 /= double(_npart);
+      scalef = sqrt(3.0 * _temp / sumv2);   // velocity scale factor 
+      for (int i=0; i<_npart; i++){
+        _particle(i).setvelocity(0, vx(i)*scalef);
+        _particle(i).setvelocity(1, vy(i)*scalef);
+        _particle(i).setvelocity(2, vz(i)*scalef);
+      }
 	
-    }else{
+    }
+    else{
     	//DELTA
     	//initial velocity
-    	double velt=sqrt(3*_temp);
+    	double velt=sqrt(3*_temp); //set module velocity
     	for (int i=0; i<_npart; i++){
 	      double rdir  = _rnd.Rannyu();
 	      double rvers = _rnd.Rannyu()-0.5;
-	      int sign= ((rvers<0)? -1: 1);//0;
-	      
-	      
-
+	      int sign= ((rvers<0)? -1: 1);//0; 
 	      
 	      if(rdir<1/3.)
 	      {
-	      	      vx(i) = sign*velt;
+          vx(i) = sign*velt;
 		      vy(i) = 0.;
 		      vz(i) = 0.;
-	      }else if(rdir<2/3.)
+	      }
+        else if(rdir<2/3.)
 	      {
-	      	      vx(i) = 0.;
+          vx(i) = 0.;
 		      vy(i) = sign*velt;
 		      vz(i) = 0.;      
-	      } else
+	      }
+        else
 	      {
-	      	      vx(i) = 0.;
+          vx(i) = 0.;
 		      vy(i) = 0.;
 		      vz(i) = sign*velt;
 	      }
 
-    	for (int i=0; i<_npart; i++){
-		_particle(i).setvelocity(0, vx(i));
-		_particle(i).setvelocity(1, vy(i));
-		_particle(i).setvelocity(2, vz(i));
-	}
-
-
-	     
-	    }
+        for (int i=0; i<_npart; i++){
+          _particle(i).setvelocity(0, vx(i));
+          _particle(i).setvelocity(1, vy(i));
+          _particle(i).setvelocity(2, vz(i));
+        }	     
+      }
     }
 
     for (int i=0; i<_npart; i++){

@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -O3 --std=c++11
 AFLAGS = -larmadillo
 
-INCLUDE_DIRS = ../NSL_SIMULATOR/SOURCE/
+INCLUDE_DIRS = ../../NSL_SIMULATOR/SOURCE/
 
 
 all: simulator.exe
@@ -21,5 +21,5 @@ clean :
 cleanall:
 	rm *.o simulator.exe
 remove:
-	rm OUTPUT/*.*
-	rm OUTPUT/CONFIG/*.*
+	rm ../OUTPUT/*.*
+	rm ../OUTPUT/CONFIG/*.*

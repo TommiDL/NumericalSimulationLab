@@ -21,11 +21,14 @@ int main (int argc, char *argv[]){
   System SYS;
   SYS.initialize();
 
+  SYS.init_termal_files();
+
   double step_temp=0.1;
   
   double tmin=0., tmax=3.;
 
   int nstep_temp=int((tmax-tmin)/step_temp);
+  
 
   for(int ts=0; ts<nstep_temp; ts++)
   {
@@ -41,9 +44,11 @@ int main (int argc, char *argv[]){
 
 
       
-    for(int i=0; i < SYS.get_nbl(); i++){ //loop over blocks
+    for(int i=0; i < SYS.get_nbl(); i++)
+    { //loop over blocks
 
-      for(int j=0; j < SYS.get_nsteps(); j++){ //loop over steps in a block
+      for(int j=0; j < SYS.get_nsteps(); j++)
+      { //loop over steps in a block
         SYS.step();
         SYS.measure();
         /*if(j%50 == 0){
@@ -59,9 +64,13 @@ int main (int argc, char *argv[]){
     }
 
     cout<<RESET<<endl<<endl;
-    SYS.finalize();
-  }
+     
 
+    SYS.write_finals_props();
+    SYS.finalize();
+
+
+  }
 
   return 0;
 }

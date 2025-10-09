@@ -38,10 +38,15 @@ void save_data(
 );
 
 void save_data(
+	vector<int> &throws, 
 	vector<float> &data, 
 	string filename=""
 );
 
+void save_data(
+	vector<float> &data, 
+	string filename=""
+);
 void save_data(
 	vector<double> &data, 
 	string filename=""

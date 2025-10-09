@@ -155,6 +155,47 @@ void save_data(
 	cout<<"Data saved in path "<<filename<<endl;
 }
 
+void save_data(
+	vector<int> &throws, 
+	vector<float> &data, 
+	string filename//=""
+)
+{
+	if(data.size()!=throws.size())
+	{
+		cerr<<"Error: Unmatching dimension between data and number of throw"<<endl;
+		cerr<<"data dimension "<<data.size()<<", throw dimension "<<throws.size()<<endl;
+		exit(1);
+
+	}
+	
+	int size=data.size();
+	
+	//default value for filename
+	if (filename=="")
+	{
+		filename="data.csv";
+	}	
+	
+	ofstream out(filename);
+	
+	if (!out.is_open())
+	{
+		cerr<<"Error: can not open "<<filename<<endl;
+		exit(1);
+	}
+	
+	out<<"throws,avg"<<endl;
+	
+	for (int i=0; i<size; ++i)
+	{	
+		out<<throws[i]<<", "<<data[i]<<endl;
+	}
+	
+	out.close();
+	cout<<"Data saved in path "<<filename<<endl;
+}
+
 
 
 void save_data(

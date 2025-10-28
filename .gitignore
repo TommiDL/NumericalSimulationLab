@@ -2,7 +2,8 @@
 *.zip
 *.txt
 *.xyz
-*.dat
+._*
+#*.dat
 *.o
 introduzione_es/
 *.ipynb_checkpoints/*

@@ -25,3 +25,4 @@ void progress(int block, int nblock, int barlenght=30)
 	cout<<GREEN <<"\r\t"<<str<<setw(barlenght-l+1)<<"]["
       <<fixed<<setprecision(2) <<100*l/float(barlenght)<<"%]"<<flush;
 } 
+

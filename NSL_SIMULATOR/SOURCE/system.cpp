@@ -8,6 +8,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <string>
@@ -66,18 +67,26 @@ double System :: Force(int i, int dim){
 
 void System :: move(int i){ // Propose a MC move for particle i
   if(_sim_type == 3){ //Gibbs sampler for Ising
-    double p_flip = _particle(i).getspin()*_beta*_J*(
-      _particle(this->pbc(i-1)).getspin() + _particle(this->pbc(i+1)).getspin()
+    double delta_E = 2.0 * ( 
+      _J * (_particle(this->pbc(i-1)).getspin() + _particle(this->pbc(i+1)).getspin() ) 
+      + _H 
     );
+    
 
-    p_flip=1/(1+exp(p_flip));
+    double p_up =1./(1+exp(-_beta*delta_E));
 
     //actual sampling
-    if(_rnd.Rannyu()<p_flip)
+    if(_rnd.Rannyu()<p_up)
     {
-      int oldspin=_particle(i).getspin();
-      _particle(i).setspin(-1*oldspin);
+      //int oldspin=_particle(i).getspin();
+      _particle(i).setspin(1);
     }
+    else
+    {
+      _particle(i).setspin(-1);
+    }
+
+
 
     _naccepted++;
         
@@ -234,7 +243,17 @@ void System :: initialize(){ // Initialize the System object according to the co
       string dtype = (_distr_type==0)? "Maxwell-Boltzmann": "Delta";
       coutf << "INITIAL DISTRIBUTION TYPE= " << dtype << endl;
       
-    } else if( property == "ENDINPUT" ){
+    } else if(property == "TAILCORRECTION"){
+      string tail_str;
+      input >> tail_str ;
+      _tail_correction = (tail_str=="true" or tail_str=="TRUE" or tail_str=="True" );
+      tail_str = (_tail_correction)? "TAIL CORRECTION INCLUDED": "TAIL CORRECTION NOT INCLUDED";  
+      coutf << tail_str <<endl;
+
+    }else if( property == "EQSTEPS" ){
+      input >> eq_steps;
+      coutf << eq_steps << " EQUILIBRATION STEPS" << endl;
+    }else if( property == "ENDINPUT" ){
       coutf << "Reading input completed!" << endl;
       break;
     } else cerr << "PROBLEM: unknown input" << endl;
@@ -358,7 +377,7 @@ void System :: initialize_velocities(){
       _particle(i).setpositold(2, zold);
     }
   }
-  
+
 
   return;
 }
@@ -400,7 +419,7 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _index_penergy = index_property;
         _measure_penergy = true;
         index_property++;
-        _vtail = 8*M_PI*_rho/(3.*pow(_r_cut,3)) * (1./(3*pow(_r_cut, 6)) -1 ); // TO BE FIXED IN EXERCISE 7
+        _vtail = (_tail_correction)? 8*M_PI*_rho/(3.*pow(_r_cut,3)) * (1./(3*pow(_r_cut, 6)) -1 ) : 0.; // TO BE FIXED IN EXERCISE 7
       } else if( property == "KINETIC_ENERGY" ){
         ofstream coutk("../OUTPUT/kinetic_energy.dat");
         coutk << "#BLOCK:   ACTUAL_KE:    KE_AVE:      ERROR:" << endl;
@@ -419,6 +438,7 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _measure_tenergy = true;
         _index_tenergy = index_property;
         index_property++;
+
       } else if( property == "TEMPERATURE" ){
         ofstream coutte("../OUTPUT/temperature.dat");
         coutte << "#BLOCK:   ACTUAL_T:     T_AVE:       ERROR:" << endl;
@@ -427,6 +447,7 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _measure_temp = true;
         _index_temp = index_property;
         index_property++;
+
       } else if( property == "PRESSURE" ){
         ofstream coutpr("../OUTPUT/pressure.dat");
         coutpr << "#BLOCK:   ACTUAL_P:     P_AVE:       ERROR:" << endl;
@@ -435,10 +456,10 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _measure_pressure = true;
         _index_pressure = index_property;
         index_property++;
-        _ptail = 32*M_PI*_rho*(1/(9.*pow(_r_cut, 9)) -1./(6.*pow(_r_cut, 3)))  ; // TO BE FIXED IN EXERCISE 7
+        _ptail = (_tail_correction)? 32*M_PI*_rho*(1/(9.*pow(_r_cut, 9)) -1./(6.*pow(_r_cut, 3))) : 0. ; // TO BE FIXED IN EXERCISE 7
       } else if( property == "GOFR" ){
         ofstream coutgr("../OUTPUT/gofr.dat");
-        coutgr << "# DISTANCE:     AVE_GOFR:        ERROR:" << endl;
+        coutgr << "#DISTANCE:     AVE_GOFR:        ERROR:" << endl;
         coutgr.close();
         input>>_n_bins;
         _nprop+=_n_bins;
@@ -471,6 +492,7 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _measure_magnet = true;
         _index_magnet = index_property;
         index_property++;
+
         
       } else if( property == "SPECIFIC_HEAT" ){
         string filename = (_sim_type>=2)? 
@@ -509,6 +531,8 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _measure_chi = true;
         _index_chi = index_property;
         index_property++;
+
+
       } else if( property == "ENDPROPERTIES" ){
         ofstream coutf;
         coutf.open("../OUTPUT/output.dat",ios::app);
@@ -532,6 +556,39 @@ void System :: initialize_properties(){ // Initialize data members used for meas
   _nattempts = 0;
   _naccepted = 0;
   return;
+}
+
+void System :: init_termal_files()
+{
+  string property;
+  ifstream input("../INPUT/properties.dat");
+  if (input.is_open()){
+    while ( !input.eof() ){
+      input >> property;
+
+      if( property == "TOTAL_ENERGY" ){
+        ofstream couttemp("../OUTPUT/total_energy_T.dat");
+        couttemp << "TEMP   TE_AVE    ERROR" << endl;
+        couttemp.close();
+      } else if( property == "MAGNETIZATION" ){
+        ofstream couttemp("../OUTPUT/magnetization_T.dat");
+        couttemp << "TEMP   M_AVE    ERROR" << endl;
+        couttemp.close();
+      } else if( property == "SPECIFIC_HEAT" ){
+        ofstream couttemp("../OUTPUT/specific_heat_T.dat");
+        couttemp << "TEMP   CV_AVE    ERROR" << endl;
+        couttemp.close();
+      } else if( property == "SUSCEPTIBILITY" ){
+          ofstream couttemp("../OUTPUT/susceptibility_T.dat");
+          couttemp << "TEMP   X_AVE    ERROR" << endl;
+          couttemp.close();
+      } else if( property == "ENDPROPERTIES" ){
+        break;
+      }
+    }
+    input.close();
+  } else cerr << "PROBLEM: Unable to open properties.dat" << endl;
+
 }
 
 void System :: finalize(){
@@ -691,8 +748,21 @@ void System :: measure(){ // Measure properties
             penergy_temp += 1.0/pow(dr,12) - 1.0/pow(dr,6); // POTENTIAL ENERGY
           if(_measure_pressure) 
             virial       += 1.0/pow(dr,12) - 0.5/pow(dr,6); // PRESSURE
+          if(_measure_gofr)
+          {
+            int k = floor(_n_bins*dr*2/_side(0));
+            if(k<_n_bins) _measurement(_index_gofr+k)+=2;
+          }
+
         }
       }
+    }
+    if(_measure_gofr)
+    {
+      double binr=0.5*_side(0)/_n_bins; 
+      for(int i=0; i<_n_bins; i++)
+        _measurement(_index_gofr+i)/=
+          _rho * _npart * 4.*M_PI/3.*(pow(i*binr + binr, 3) - pow(i*binr, 3));
     }
   }
 
@@ -717,7 +787,9 @@ void System :: measure(){ // Measure properties
   }
   // POTENTIAL ENERGY //////////////////////////////////////////////////////////
   if (_measure_penergy){
+    //cout <<"before "<< penergy_temp<<endl;
     penergy_temp = _vtail + 4.0 * penergy_temp / double(_npart);
+    //cout <<"after "<< penergy_temp<<endl;
     _measurement(_index_penergy) = penergy_temp;
   }
   // KINETIC ENERGY ////////////////////////////////////////////////////////////
@@ -743,12 +815,18 @@ void System :: measure(){ // Measure properties
     }
   }
   // TEMPERATURE ///////////////////////////////////////////////////////////////
-  if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0/3.0) * kenergy_temp;
+  if (_measure_temp and _measure_kenergy) 
+    _measurement(_index_temp) = (2.0/3.0) * kenergy_temp;
   // PRESSURE //////////////////////////////////////////////////////////////////
-  if (_measure_pressure) _measurement[_index_pressure] = _rho * (2.0/3.0) * kenergy_temp + (_ptail*_npart + 48.0*virial/3.0)/_volume;
+  if (_measure_pressure) 
+    _measurement[_index_pressure] = 
+      _rho * (2.0/3.0) * kenergy_temp 
+      + (_ptail*_npart + 48.0*virial/3.0)/_volume;
+  
   // SPECIFIC HEAT /////////////////////////////////////////////////////////////
   //save the square and adjust while averaging
-  if (_measure_cv) _measurement(_index_cv ) = pow(tenergy_temp,2);  
+  if (_measure_cv) 
+    _measurement(_index_cv ) = pow(tenergy_temp,2);  
 
 
   // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
@@ -853,27 +931,41 @@ void System :: averages(int blk){
     coutf.close();
   }
   // GOFR //////////////////////////////////////////////////////////////////////
-  // TO BE FIXED IN EXERCISE 7
+  if(_measure_gofr)
+  {
+    coutf.open("../OUTPUT/gofr.dat", ios::app);
+    for(int k=0; k<_n_bins; k++)
+    {
+      average     = _average(_index_gofr+k);
+      sum_average = _global_av(_index_gofr+k);
+      sum_ave2    = _global_av2(_index_gofr+k);
+
+      coutf<<setw(12)<<k*_bin_size+_bin_size/2.
+	    	 //<<setw(12)<<average  
+	    	 <<setw(12)<<sum_average/(blk)
+	    	 <<setw(12)<<this->error(sum_average, sum_ave2, blk)<<endl;
+
+    }
+
+    coutf.close();
+  }
   // POFV //////////////////////////////////////////////////////////////////////
   if(_measure_pofv)
   {
     coutf.open("../OUTPUT/pofv.dat", ios::app);
-    //valid only for the first bin
-
     for(int k=0; k<_n_bins_v; ++k)
     {
-    	    average=_average(_index_pofv+k);
-    	    
-	    sum_average = _global_av(_index_pofv+k);
+      average=_average(_index_pofv+k);
+      sum_average = _global_av(_index_pofv+k);
 	    sum_ave2 = _global_av2(_index_pofv+k);
 
 	    coutf<<setw(12)<<k*_bin_size_v+_bin_size_v/2.
-	    	 <<setw(12)<<average
-	    	 <<setw(12)<<sum_average/blk
-	    	 <<setw(12)<<this->error(sum_average, sum_ave2, blk)<<endl;
+	    	 <<setw(12)<<average/_npart  
+	    	 <<setw(12)<<sum_average/(blk*_npart)
+	    	 <<setw(12)<<this->error(sum_average/_npart, sum_ave2/(_npart*_npart), blk)<<endl;
     }
     
-    
+    coutf.close();
     
   }
   
@@ -960,6 +1052,127 @@ int System :: get_nbl(){
 
 int System :: get_nsteps(){
   return _nsteps;
+}
+
+void System :: print_details()
+{
+
+
+	// type simulation
+	cout << "SIMULATION TYPE: ";
+  if(_sim_type == 0)      cout << "LJ MOLECULAR DYNAMICS (NVE) SIMULATION"  << endl;
+	else if(_sim_type == 1) cout << "LJ MONTE CARLO (NVT) SIMULATION"         << endl;
+	else if(_sim_type == 2) cout << "ISING 1D MONTE CARLO (MRT^2) SIMULATION" << endl;
+	else if(_sim_type == 3) cout << "ISING 1D MONTE CARLO (GIBBS) SIMULATION" << endl;
+	else 			   cout << "UNKNOWN SIMULATION TYPE" << endl; 
+
+
+  if(_tail_correction) cout << "TAIL CORRECTION INCLUDED" << endl;
+  else cout << "TAIL CORRECTION NOT INCLUDED" << endl;
+
+  cout << "\t- Initial temperature "<< _temp << endl;
+	//initial distribution
+	if (_restart==1)
+		cout << "\tStarting from last saved configuration" << endl;
+	else
+	{
+		if(_distr_type==0)
+			cout << "\t- Starting from Maxwell-Boltzmann distribution" << endl;
+		else if (_distr_type==1)
+			cout << "\t- Starting from Delta distribution" << endl;
+		
+	}  
+
+  cout << "\t- " << this->eq_steps << " Equilibration steps" << endl;
+
+
+}
+
+
+void System :: write_finals_props()
+{
+  ofstream coutf;
+  // only properties useful for ising (not so general)
+  double  sum_average, sum_ave2;
+
+  if (_measure_tenergy){
+
+    string filename ="../OUTPUT/total_energy_T.dat"; 
+    coutf.open(filename,ios::app);
+
+    sum_average = _global_av(_index_tenergy);
+    sum_ave2 = _global_av2(_index_tenergy);
+
+    coutf << setw(0) << _temp 
+          << setw(12) << sum_average/double(_nblocks)
+          << setw(12) << this->error(sum_average, sum_ave2, _nblocks) << endl;
+    coutf.close();
+  }
+  if(_measure_magnet)
+  {
+    string filename = "../OUTPUT/magnetization_T.dat";
+
+    coutf.open(filename, ios::app);
+    if (!coutf.is_open()) cout <<"ERROR"<<endl;
+    
+    sum_average = _global_av(_index_magnet);
+    sum_ave2 = _global_av2(_index_magnet);
+    coutf << setw(0) << _temp
+          << setw(12) << sum_average/double(_nblocks)
+          << setw(12) << this->error(sum_average, sum_ave2, _nblocks) << endl;
+    coutf.close();
+
+    
+  }
+  // SPECIFIC HEAT /////////////////////////////////////////////////////////////
+  if(_measure_cv)
+  {
+    string filename ="../OUTPUT/specific_heat_T.dat"; 
+
+    coutf.open(filename, ios::app);
+    
+
+    sum_average = _global_av(_index_cv);
+    sum_ave2 = _global_av2(_index_cv);
+    
+    coutf << setw(0) << _temp
+          << setw(12) << sum_average/double(_nblocks)
+          << setw(12) << this->error(sum_average, sum_ave2, _nblocks) << endl;
+    coutf.close();
+    
+
+
+  }
+
+  // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
+  if(_measure_chi)
+  {
+
+    string filename = "../OUTPUT/susceptibility_T.dat"; 
+
+    coutf.open(filename, ios::app);
+
+    sum_average = _global_av(_index_chi);
+    sum_ave2 = _global_av2(_index_chi);
+    
+    coutf << setw(0) << _temp
+          << setw(12) << sum_average/double(_nblocks)
+          << setw(12) << this->error(sum_average, sum_ave2, _nblocks) << endl;
+    coutf.close();
+
+  }
+}
+
+
+void System :: equilibration_steps()
+{
+  for(int i=0; i<this->eq_steps; i++)
+  {
+    this->step();
+  }
+
+  cout <<this->eq_steps << " equilibration steps executed." << endl;
+  return ;
 }
 
 /****************************************************************

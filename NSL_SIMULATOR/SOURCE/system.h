@@ -32,7 +32,8 @@ private:
   int _npart;           // Number of particles
   int _nblocks;         // Number of blocks for block averaging
   int _nsteps;          // Number of simulation steps in each block
-  int _distr_type;	// 0 = Maxwell-Boltzmann | else Delta in sqrt(3*temp)
+  int _distr_type=0;	// 0 = Maxwell-Boltzmann [default] | else Delta in sqrt(3*temp)
+  int eq_steps=0;
   int _nattempts;       // Number of attempted moves
   int _naccepted;       // Number of accepted moves
   double _temp, _beta;  // Temperature and inverse temperature
@@ -45,6 +46,7 @@ private:
   Random _rnd;          // Random number generator
   field <Particle> _particle; // Field of particle objects representing the system
   vec _fx, _fy, _fz;    // Forces on particles along x, y, and z directions
+  bool _tail_correction=true; //include tail correction (default value true)
 
   // Properties
   int _nprop; // Number of properties being measured
@@ -72,6 +74,7 @@ public: // Function declarations
   int get_nsteps();           // Get the number of steps in each block
   void initialize();          // Initialize system properties
   void initialize_properties();// Initialize properties for measurement
+  void init_termal_files();   // Initialize files to store last block values for each temperature
   void finalize();            // Finalize system and clean up
   void write_configuration(); // Write final system configuration to XYZ file
   void write_XYZ(int nconf);  // Write system configuration in XYZ format on the fly
@@ -90,6 +93,10 @@ public: // Function declarations
   double Force(int i, int dim); // Calculate force on a particle along a dimension
   double Boltzmann(int i, bool xnew); // Calculate Boltzmann factor for Metropolis acceptance
   void set_temp(double temp){_temp=temp; _beta=1./temp;}; 
+  void print_details();
+  void write_finals_props();// Write temperature and last block's average
+                            // and error of every prop on file <prop>_T.dat
+  void equilibration_steps(); //execute steps without measures for equilibration
 };
 
 #endif // __System__

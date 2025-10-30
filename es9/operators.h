@@ -22,7 +22,6 @@ class selection
         selection(string filename);
 
         ~selection();
-        void save_population_best(string filename="epochs.dat");
         vector<crom> sort_population(vector<crom> &pop);
         double evaluate_sol(crom sol);
 
@@ -61,16 +60,16 @@ class mutation
         ~mutation();
 
         crom permutation(crom sol);
-        vector<crom> permutation (vector<crom> &pop, double prob);
+        void permutation (vector<crom> &pop, double prob);
 
         crom shift(crom sol, int n, int m);
-        vector<crom> shift (vector<crom> &pop, double prob);
+        void shift (vector<crom> &pop, double prob);
 
         crom subpermutation(crom sol, int m);
-        vector<crom> subpermutation (vector<crom> &pop, double prob);
+        void subpermutation (vector<crom> &pop, double prob);
 
         crom inversion(crom sol, int m);
-        vector<crom> inversion (vector<crom> &pop, double prob);
+        void inversion (vector<crom> &pop, double prob);
 
     private:
         Random _rnd;

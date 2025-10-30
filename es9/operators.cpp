@@ -13,6 +13,7 @@
 #include <iostream>
 #include <numeric>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -64,7 +65,9 @@ void selection::compute_costs(vector<crom> &pop)
     _pop_costs.resize(pop.size());
     for(int k = 0; k<pop.size(); k++)
     {
-        _pop_costs[k]=this->evaluate_sol(pop[k]);
+        _pop_costs[k]=this->evaluate_sol(
+            pop[k]
+        );
     }
 }
 
@@ -199,6 +202,8 @@ void selection::selection_prob2(vector<crom> &pop, double p)
 {
     vector<crom> newpop (pop.size());
 
+    this->sort_population(newpop);
+    
     for(int k=0; k<pop.size(); k++)
     {
         int j = static_cast<int>(
@@ -256,6 +261,7 @@ void selection::save_population_best(vector<crom> &pop, string filename)
     {
         out <<j<<", ";
     }
+    out<<pop[best_index][0]<<","<<min_cost;
     out<<endl;
 
     return;
@@ -272,24 +278,21 @@ mutation::mutation()
 mutation::~mutation()
 {};
 
-
+/*
+Permute 2 random index in the given solution
+*/
 crom mutation::permutation(crom sol)
 {
     int index1 = static_cast<int>(
-        this->_rnd.Rannyu(0, sol.size())
+        this->_rnd.Rannyu(1, sol.size())
     );
 
-//    int index2 = static_cast<int>(
-  //      this->_rnd.Rannyu(0, sol.size())
-    //);
-
-    //if(index1==index2) 
-    //{
     int index2 ;
-    if(this->_rnd.Rannyu()<0.5)
+
+    if(this->_rnd.Rannyu()<static_cast<double>(index1)/(sol.size()-1))
     {
         index2 = static_cast<int>(
-            this->_rnd.Rannyu(0, index1)
+            this->_rnd.Rannyu(1, index1)
         );    
     }
     else {
@@ -297,18 +300,18 @@ crom mutation::permutation(crom sol)
             this->_rnd.Rannyu(index1+1, sol.size())
         );
     }
-    //}
     int temp=sol[index1];
     sol[index1]=sol[index2];
+
     sol[index2]=temp;
+
 
     return sol;
 }
 
 
-//redundant because yet modifies the pop 
-//but in case i want to change let's keep it like that
-vector<crom> mutation::permutation (
+
+void mutation::permutation (
     vector<crom> &pop, double prob
 )
 {
@@ -316,11 +319,12 @@ vector<crom> mutation::permutation (
     {
         if(this->_rnd.Rannyu()<prob)
         {
-            pop[k]=this->permutation(pop[k]);
+            crom newsol=this->permutation(pop[k]);
+            pop[k]=newsol;
         }
     }
 
-    return pop;
+    return;
 }
 
 
@@ -333,25 +337,66 @@ crom mutation::shift(crom sol, int n, int m)
         exit(1);
     }
 
-    int N=sol.size()-1;
+    int N=sol.size();
 
-    n%=N;
+    //int index = static_cast<int>(this->_rnd.Rannyu(1, N));
+
+    n%=N-1;
+
     crom newsol=sol;
-    int start = max(0, (m+n)-N);
-    for(int j =1; j<=n; j++)
+    int start = max(0, (m+n)-N+1);
+    int end = min(N-1, m+n)-m;
+
+
+    for(int j =1; j<=end; j++)
     {
-        newsol[start+j]=sol[j+m];
+        newsol[start+j]=sol[m+j];
     }
 
-    // shift 
+    // shift
+    int newindex; 
     for(int k=0; k<m; k++)
     {   
-        newsol[1+(k+n)%N]=sol[k+1];
+        newindex=1+(k+n)%(N-1);
+        
+
+        newsol[newindex]= sol[k+1];
     }
 
     return newsol;
 }
 
+void mutation::shift(
+    vector<crom> &pop, double prob
+)
+{
+    int m, n; // generated random every time
+    for(int k=0; k<pop.size(); k++)
+    {
+        if(this->_rnd.Rannyu()<prob)
+        {
+
+
+            m = this->_rnd.Rannyu(
+                1, pop[k].size()-1
+            );
+            
+            n =  this->_rnd.Rannyu(
+                1, pop[k].size()
+            );
+
+
+            crom newsol =this->shift(pop[k], n=n, m=m); 
+            pop[k]=newsol;
+        }
+    }
+
+    return ;
+
+}
+
+
+// to finish
 
 crom mutation::subpermutation(crom sol, int m)
 {
@@ -366,10 +411,6 @@ crom mutation::subpermutation(crom sol, int m)
     }
 
     crom newsol; 
-
-//    int start = static_cast<int>(this->_rnd.Rannyu(
-//        1, N-m
-//    ));
 
     int start;
 
@@ -420,6 +461,44 @@ crom mutation::subpermutation(crom sol, int m)
 
     return newsol;
 }
+
+
+crom mutation::inversion(crom sol, int m)
+{
+    int start=static_cast<int>
+        (this->_rnd.Rannyu(1, sol.size()-m));
+
+    crom newsol = sol;
+    for(int k=0; k<=m; k++)
+    {
+        newsol[start+k]=sol[start+m-k];
+    }
+
+    return newsol;
+}
+
+void mutation::inversion(vector<crom> &pop, double prob)
+{
+    int m; //generated random every time
+    for(int k=0; k<pop.size(); k++)
+    {
+        if(this->_rnd.Rannyu()<prob)
+        {
+
+            m = this->_rnd.Rannyu(
+                1, pop[k].size()-1
+            );
+
+            pop[k]=this->inversion(pop[k], m);
+        }
+    }
+
+    return;
+    
+}
+
+
+
 
 crom mutation::swap(
     crom sol, int start1, int start2, int size

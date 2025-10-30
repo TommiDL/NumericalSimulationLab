@@ -2,18 +2,18 @@
 
 
 
-void print(crom s)
+void print(crom s, string prefactor)
 {
     for(int k:s)
-        cout << k << " ";
+        cout <<prefactor<< k << " ";
     cout<<endl;
     return;
 }
 
-void print(vector<crom> &pop)
+void print(vector<crom> &pop, string prefactor)
 {
     for(crom s:pop)
-        print(s);
+        print(s, prefactor);
     return;
 }
 

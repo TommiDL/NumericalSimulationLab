@@ -1,5 +1,8 @@
 #include "map.h"
+#include <fstream>
 #include <iomanip>
+#include <stdexcept>
+#include <string>
 
 
 coordinates::coordinates(int n, string path)
@@ -119,9 +122,14 @@ double coordinates::L2(vector<int> cities)
     double cost = 0;
     for(int k=0; k<cities.size()-1; k++)
     {
-        cost+= this->dist2(cities[k], cities[k+1]);
+        cost+= this->dist2(
+            cities[k], cities[k+1]
+        );
     }
-    cost+=this->dist2(cities[cities.size()-1], cities[0]);
+    cost+=this->dist2(
+        cities[cities.size()-1], 
+        cities[0]
+    );
 
     return cost;
 }
@@ -129,10 +137,15 @@ double coordinates::L2(vector<int> cities)
 void coordinates::check_index(int n)
 {
     if ((n>=_ncities) or (n<0)) {
-        cerr  << "ERROR: coordinates index "
-        <<n<<"outside range 0-"<< _ncities
-        << endl;
-        exit(1);
+        //cerr  << "ERROR: coordinates index "
+        //<<n<<" outside range 0-"<< _ncities
+        //<< endl;
+        throw invalid_argument(
+            "ERROR: coordinates index "
+            +to_string(n) 
+            + " outside range 0-" 
+            + to_string(_ncities)
+        );
     }
     return;
 }
@@ -187,3 +200,20 @@ void coordinates::print()
         cout<<endl;
     }
 }
+
+void coordinates::save_coordinates(string filename)
+{
+
+    ofstream out(filename);
+
+    out << "#number of cities: "<<_ncities<<endl;
+    out << "number,x,y" <<endl;
+    for(int k=0; k<_ncities; k++)
+    {
+        out <<k;
+        for(int dim=0; dim<_ndim; dim++) 
+            out<<","<<this->_coord(k, dim);
+        out<<endl;
+    }
+}
+

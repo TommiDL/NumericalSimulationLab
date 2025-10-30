@@ -35,6 +35,7 @@ class coordinates
         void print();
         int get_ncities(){return _ncities;};
 
+        void save_coordinates(string filename);
     private:
         mat _coord;
         int _ndim=2;

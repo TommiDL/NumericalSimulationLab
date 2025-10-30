@@ -12,8 +12,8 @@ using namespace std;
 typedef vector<int> crom;
 
 
-void print(crom s);
-void print(vector<crom> &pop);
+void print(crom s, string prefactor="");
+void print(vector<crom> &pop, string prefactor="");
 
 
 #endif

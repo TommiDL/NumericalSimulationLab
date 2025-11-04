@@ -22,34 +22,20 @@ class selection
         selection(string filename);
 
         ~selection();
-        vector<crom> sort_population(vector<crom> &pop);
-        double evaluate_sol(crom sol);
 
-        void selection_prob1(vector<crom> &pop);
-        void selection_prob2(vector<crom> &pop, double p = 2.);
-        void save_population_best(vector<crom> &pop, string filename="best_sol.dat");
+        void set_metric(string norm = "L1");
+        double evaluate_sol(crom sol);
+        
 
 
     private:
 
         // members
         coordinates *_map;
-        bool existing_coord=true;
-
-        vector<double> _pop_costs;
-        crom _best;
-        Random _rnd;
+        bool existing_coord=true; // to eventually deallocate pointer
 
         cost C=&coordinates::L2;  //pointer to function
 
-        void compute_costs(vector<crom> &pop);
-
-        void compute_prob1(vector<crom> &pop);
-
-        void init_gen(
-            string primesfile="Primes", int primerow=2, 
-            string seedfile="seed.in"
-        );
 
 };
 
@@ -60,16 +46,9 @@ class mutation
         ~mutation();
 
         crom permutation(crom sol);
-        void permutation (vector<crom> &pop, double prob);
-
         crom shift(crom sol, int n, int m);
-        void shift (vector<crom> &pop, double prob);
-
         crom subpermutation(crom sol, int m);
-        void subpermutation (vector<crom> &pop, double prob);
-
         crom inversion(crom sol, int m);
-        void inversion (vector<crom> &pop, double prob);
 
     private:
         Random _rnd;
@@ -77,32 +56,30 @@ class mutation
         crom swap(crom sol, int start1, 
             int start2, int size);
 
-        void init_gen(
-            string primesfile="Primes", int primerow=3, 
-            string seedfile="seed.in"
-        );
 };
 
 
-/*
+
 class crossing
 {
     public:
         crossing();
-
-        pair<vec, vec> cross(const vec &parent1, const vec &parent2, int cpoint);
-
-
+        //pair<crom, crom> cross(crom parent1, crom parent2);
+        pair<crom, crom> cross(
+            crom parent1, crom parent2, int crosspoint
+        );
         
-    private:
-        int _dim;
+        pair<crom, crom> cross(
+            crom parent1, crom parent2
+        );
 
+
+
+    private:
+        Random _rnd;
 
 
 };
 
 
-class mutation
-{};
-*/
 #endif

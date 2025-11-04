@@ -1,3 +1,4 @@
+#include "function.h"
 #include "map.h"
 #include "population.h"
 
@@ -11,15 +12,16 @@ int main()
     pop.print();
 */
 
-    int ncities=34, dimpop=100;
+    int ncities=10, dimpop=100;
 
     coordinates coord(ncities, "circle");
 
     coord.print();
+    cout << "---end of coord --\n";
     coord.save_coordinates("coordinates.csv");
 
     population pop(coord, dimpop);
-    pop.print();
+    //pop.print();
 
     pop.set_mutation_probability(
         0.8, 
@@ -29,16 +31,18 @@ int main()
 
 
 
-    for(int j=0; j<1000; j++)
+    int nsteps=10000;
+    cout << "Evolution started\n";
+    for(int j=0; j<nsteps; j++)
     {
-        cout << "evolution "<<j<<endl;
+        //cout << "evolution "<<j<<endl;
         pop.evolve();
-        pop.print("\t");
         pop.save_population_best();
+        progress(j, nsteps);
     }
-    cout<<endl;
+    cout<<RESET<<endl;
 
-    pop.print();
+    //pop.print();
     cout << "ended"<<endl;
     return 0;
 

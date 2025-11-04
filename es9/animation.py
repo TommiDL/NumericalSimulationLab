@@ -10,7 +10,7 @@ coord
 bests = pd.read_csv('best_sol.dat', skiprows=1, names=[f'city{k}' for k in range(coord.index.size+1)]+['dist'])
 #print(bests)
 
-Figure , ax = plt.subplots(2,1)
+Figure , ax = plt.subplots(2,1,figsize=(5, 8), gridspec_kw={'height_ratios': [5, 3]})
 
 
 
@@ -24,12 +24,12 @@ line_plotted = lines_plotted[0]
 
 ax[0].set_xlim(-1.2, 1.2)  
 ax[0].set_ylim(-1.2, 1.2)  
-
 ax[1].set_ylim(bests.dist[0]-100,bests.dist[0]+100)  
+
 ax[1].set_xlim(-1, bests.index.size)  
 
 label = ax[0].text(0.8, 0.95, "", ha='center', va='center', fontsize=20, color="Black")
-label2 = ax[0].text(0.8, 0.9, "", ha='center', va='center', fontsize=20, color="Black")
+label2 = ax[0].text(0.8, 0.7, "", ha='center', va='center', fontsize=20, color="Black")
 
 dists_plotted = ax[1].plot([])
 dist_plotted = dists_plotted[0]
@@ -47,7 +47,7 @@ def AnimationFunction(j):
     
     steps.append(j)
     dists.append(bests.dist[j])
-    dist_plotted.set_data(steps, dists)  
+    dist_plotted.set_data((steps, dists)) 
 
 anim_created = FuncAnimation(
     Figure, AnimationFunction,
@@ -58,6 +58,10 @@ anim_created = FuncAnimation(
 video = anim_created.to_html5_video()
 html = display.HTML(video)
 display.display(html) 
-plt.show()
+anim_created.save(
+    'animation.gif',
+    fps=25
+    )
+
 # good practice to close the plt object.
 plt.close()

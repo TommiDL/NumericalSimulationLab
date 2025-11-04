@@ -6,48 +6,53 @@
 #include <armadillo>
 #include <cassert>
 #include <cstdlib>
-#include <ctime>
-#include <exception>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
-#include <numeric>
 #include <ostream>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-selection::selection()
-{
-    init_gen();
-}
+/*####################################################*/
+/*                     SELECTION                      */
+/*####################################################*/
 
+/*
+    Default constructor only initialize random generator 
+ */
+selection::selection(){}
+
+/*
+Initialize random generator and coordinates
+*/
 selection::selection(coordinates &map)
 {
     this->_map = &map ;
-    init_gen();
-
 }
 
 /*
-Take in input the number of cities 
+Initialize random generator and 
+generate the cities along a chosen path     
 */
 selection::selection(int n_points, string path)
 {
     this->_map = new coordinates(n_points, path);
     this->existing_coord=false;
-    init_gen();
 
 }
 
+/*
+Load cities from file and initialize random number generator
+*/
 selection::selection(string filename)
 {
     this->_map = new coordinates(filename);
     this->existing_coord=false;
-    init_gen();
 }
 
+/*
+If dinamically allocated delete pointer to coordinates
+*/
 selection::~selection()
 {
     //destroy pointer's content only if dinamically allocated
@@ -55,225 +60,52 @@ selection::~selection()
         delete []_map;
 }
 
+/*
+    Select a Metric for the evaluation
+    Parameter :
+        - string norm 
+            - "L1" absolute distance  
+            - "L2" squared absolute distance
+*/
+void selection::set_metric(string norm)
+{
+    if (norm == "L1" || norm == "l1")
+    {
+        this->C = &coordinates::L1;
+    }
+    else if (norm == "L2" || norm == "l2")
+    {
+        this->C = &coordinates::L2;
+    }
+    else {
+        cout << "Default metric L2" << endl; 
+        this->C = &coordinates::L2;
+    }
+}
+
+
+/*
+Evaluate solution from a given metric
+*/
 double selection::evaluate_sol(crom sol)
 {
     return (_map->*C)(sol);
 }
 
-void selection::compute_costs(vector<crom> &pop)
-{
-    _pop_costs.resize(pop.size());
-    for(int k = 0; k<pop.size(); k++)
-    {
-        _pop_costs[k]=this->evaluate_sol(
-            pop[k]
-        );
-    }
-}
 
-
-/*
-merge sort based on the coordinates cost
-*/
-vector<crom> selection::sort_population(vector<crom> &pop)
-{
-
-
-    if (pop.size()>1) {
-        int mid = pop.size()/2;
-        
-        vector<crom> lefthalf(pop.begin(),pop.begin()+mid);
-
-        vector<crom> righthalf(pop.begin()+mid,pop.begin()+pop.size());
-
-        lefthalf = sort_population(lefthalf);
-        righthalf = sort_population(righthalf);
-
-        unsigned i = 0;
-        unsigned j = 0;
-        unsigned k = 0;
-
-        while (i < lefthalf.size() && j < righthalf.size()) {
-            if (this->evaluate_sol(lefthalf[i]) < this->evaluate_sol(righthalf[j])) {
-                pop[k]=lefthalf[i];
-                i++;
-            } else {
-                pop[k] = righthalf[j];
-                j++;
-            }
-            k++;
-        }
-
-        while (i<lefthalf.size()) {
-            pop[k] = lefthalf[i];
-            i++;
-            k++;
-        }
-
-        while (j<righthalf.size()) {
-            pop[k]=righthalf[j];
-            j++;
-            k++;
-        }
-
-    }
-
-    return pop;
-}
-
-
-/*
-Compute probabilities of the solutions and store it 
-in the _pop_costs vector using the distance between cities
-*/
-void selection::compute_prob1(vector<crom> &pop)
-{
-    //store costs in _pop_costs vector
-    this->compute_costs(pop);
-    
-    //
-    double norm = sqrt(std::inner_product(
-        this->_pop_costs.begin(), this->_pop_costs.end(),
-        this->_pop_costs.begin(), 0.  
-    ));
-
-    
-
-    // vector per scalar std multiplication to normalize _pop_costs 
-    std::transform(
-        this->_pop_costs.begin(), 
-        this->_pop_costs.end(), 
-        this->_pop_costs.begin(), //update _pop_costs
-        std::bind(
-            std::multiplies<double>(),
-            std::placeholders::_1,
-            1./norm
-        )
-    );
-    
-    //check that they are now a probability
-    double newnorm = std::inner_product(
-        this->_pop_costs.begin(), this->_pop_costs.end(),
-        this->_pop_costs.begin(), 0.  
-    );
-
-    double eps=1e-5;
-    if ((newnorm<1-eps)||(newnorm>1+eps))
-    {
-        cerr<<"Error: probability not normalized: quadratic sum ="
-            << newnorm << endl;
-
-        exit(1);
-    }
-    return;    
-}
-
-void selection::selection_prob1(vector<crom> &pop)
-{
-    compute_prob1(pop); // store in _pop_costs the probabilities
-
-    vector<crom> newpop(pop.size());
-
-    for(int j=0; j<pop.size(); j++)
-    {
-        double part_sum=0.;
-        double r = this->_rnd.Rannyu();
-    
-        //check if the random value uniformly generated
-        //  is inside the intervals
-        for(int k=0; k<this->_pop_costs.size(); k++)
-        {
-            part_sum+=this->_pop_costs[k];
-            if (r<part_sum)
-            {
-                newpop[j]=pop[k];
-                break;
-            }
-        }
-    }
-
-    //overwrite population
-    pop=newpop;
-
-    return;
-}
-
-void selection::selection_prob2(vector<crom> &pop, double p)
-{
-    vector<crom> newpop (pop.size());
-
-    this->sort_population(newpop);
-    
-    for(int k=0; k<pop.size(); k++)
-    {
-        int j = static_cast<int>(
-            pop.size()*pow(this->_rnd.Rannyu(), p)
-        );
-        newpop[k]= pop[j];
-    }
-
-    //overwrite pop
-    pop = newpop;
-    return;
-}
-
-
-
-
-void selection::init_gen(string primesfile, int primerow, string seedfile)
-{
-
-    // INIT RANDOM GENERATOR
-    int p1, p2; // Read from ../INPUT/Primes a pair of numbers to be used to initialize the RNG
-    ifstream Primes("Primes");
-    for(int r=0; r<primerow-1; r++)
-        Primes.ignore (
-            std::numeric_limits<std::streamsize>::max(),
-            '\n' 
-        ); //skip primerow lines 
-    Primes >> p1 >> p2 ;
-    Primes.close();
-    int seed[4]; // Read the seed of the RNG
-    ifstream Seed("seed.in");
-    Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-    this->_rnd.SetRandom(seed,p1,p2);
-    return;
-}
-
-
-void selection::save_population_best(vector<crom> &pop, string filename)
-{
-
-    int best_index=0;
-    double min_cost=this->evaluate_sol(pop[0]);
-    for(int k=1; k<pop.size(); k++)
-    {
-        double cost=this->evaluate_sol(pop[k]);
-        if(cost<min_cost)
-        {
-            min_cost=cost;
-            best_index=k;
-        }
-    }
-
-    ofstream out(filename, ios::app);
-    for(int j:pop[best_index])
-    {
-        out <<j<<", ";
-    }
-    out<<pop[best_index][0]<<","<<min_cost;
-    out<<endl;
-
-    return;
-}
 
 
 /*####################################################*/
-/*                        MUTATION                           */
-mutation::mutation()
-{
-    init_gen();
-};
+/*                        MUTATION                    */
+/*####################################################*/
+
+
+mutation::mutation(){
+    init_gen(
+        _rnd, "Primes", 
+        2, "seed.in"
+    );
+}
 
 mutation::~mutation()
 {};
@@ -300,6 +132,8 @@ crom mutation::permutation(crom sol)
             this->_rnd.Rannyu(index1+1, sol.size())
         );
     }
+//    print(sol);
+//    cout << index1<<"/"<<sol.size()<<"\n";
     int temp=sol[index1];
     sol[index1]=sol[index2];
 
@@ -310,22 +144,6 @@ crom mutation::permutation(crom sol)
 }
 
 
-
-void mutation::permutation (
-    vector<crom> &pop, double prob
-)
-{
-    for(int k=0; k<pop.size(); k++)
-    {
-        if(this->_rnd.Rannyu()<prob)
-        {
-            crom newsol=this->permutation(pop[k]);
-            pop[k]=newsol;
-        }
-    }
-
-    return;
-}
 
 
 /*cyclic shifting of m sequntial number of m positions*/
@@ -338,62 +156,58 @@ crom mutation::shift(crom sol, int n, int m)
     }
 
     int N=sol.size();
+    
+    n%=N;
 
-    //int index = static_cast<int>(this->_rnd.Rannyu(1, N));
+    int index = static_cast<int>(this->_rnd.Rannyu(1, N-m));
 
-    n%=N-1;
+    // if index + m + n outbound ciclic shift
 
     crom newsol=sol;
-    int start = max(0, (m+n)-N+1);
-    int end = min(N-1, m+n)-m;
 
-
-    for(int j =1; j<=end; j++)
+    if(index+n<N)
     {
-        newsol[start+j]=sol[m+j];
+        int upper_shift, bottom_shift;
+        if (index + m +n - 1 >= N)
+        {
+            upper_shift   =  N -1;
+            bottom_shift =  index + m + n - N; 
+        }
+        else {
+            upper_shift = index + m + n-1;
+            bottom_shift = 0;
+        }
+        for(int k =1; k<index; k++)
+        {
+            newsol[bottom_shift+k] = sol[k];
+        }
+        int newN = min(N-index-m, n); //number of el to move back
+        for(int k =0; k<newN; k++)
+        {
+            newsol[bottom_shift+index + k] = sol[index+m+k];
+        }
+        //shifted
+        for(int k=0; k<m; k++)
+        {
+            int newindex = (index+k+n>N-1)? (index+k+n-N+1):(index+k+n);
+            newsol[newindex]=sol[index+k];
+        }
+
     }
-
-    // shift
-    int newindex; 
-    for(int k=0; k<m; k++)
-    {   
-        newindex=1+(k+n)%(N-1);
-        
-
-        newsol[newindex]= sol[k+1];
+    else {
+        int shift=N-n-1;
+        for(int k=index; k<index+m; k++)
+        {
+            newsol[k-shift]=sol[k];
+        }        
+        for(int k=1; k<=shift; k++)
+        {
+            newsol[index-k+m]=sol[index-k];
+        }    
     }
-
     return newsol;
 }
 
-void mutation::shift(
-    vector<crom> &pop, double prob
-)
-{
-    int m, n; // generated random every time
-    for(int k=0; k<pop.size(); k++)
-    {
-        if(this->_rnd.Rannyu()<prob)
-        {
-
-
-            m = this->_rnd.Rannyu(
-                1, pop[k].size()-1
-            );
-            
-            n =  this->_rnd.Rannyu(
-                1, pop[k].size()
-            );
-
-
-            crom newsol =this->shift(pop[k], n=n, m=m); 
-            pop[k]=newsol;
-        }
-    }
-
-    return ;
-
-}
 
 
 // to finish
@@ -466,7 +280,7 @@ crom mutation::subpermutation(crom sol, int m)
 crom mutation::inversion(crom sol, int m)
 {
     int start=static_cast<int>
-        (this->_rnd.Rannyu(1, sol.size()-m));
+        (_rnd.Rannyu(1, sol.size()-m));
 
     crom newsol = sol;
     for(int k=0; k<=m; k++)
@@ -475,26 +289,6 @@ crom mutation::inversion(crom sol, int m)
     }
 
     return newsol;
-}
-
-void mutation::inversion(vector<crom> &pop, double prob)
-{
-    int m; //generated random every time
-    for(int k=0; k<pop.size(); k++)
-    {
-        if(this->_rnd.Rannyu()<prob)
-        {
-
-            m = this->_rnd.Rannyu(
-                1, pop[k].size()-1
-            );
-
-            pop[k]=this->inversion(pop[k], m);
-        }
-    }
-
-    return;
-    
 }
 
 
@@ -525,22 +319,162 @@ crom mutation::swap(
     return newsol;
 }
 
-void mutation::init_gen(string primesfile, int primerow, string seedfile)
-{
 
-    // INIT RANDOM GENERATOR
-    int p1, p2; // Read from ../INPUT/Primes a pair of numbers to be used to initialize the RNG
-    ifstream Primes("Primes");
-    for(int r=0; r<primerow-1; r++)
-        Primes.ignore (
-            std::numeric_limits<std::streamsize>::max(),
-            '\n' 
-        ); //skip primerow lines 
-    Primes >> p1 >> p2 ;
-    Primes.close();
-    int seed[4]; // Read the seed of the RNG
-    ifstream Seed("seed.in");
-    Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-    this->_rnd.SetRandom(seed,p1,p2);
-    return;
+
+/******************************************************/
+/*                   crossing                       */
+/******************************************************/
+crossing::crossing()
+{
+    init_gen(
+        _rnd, "Primes", 
+        3, "seed.in"
+    );
+
 }
+
+
+pair<crom, crom> crossing::cross(crom parent1, crom parent2)
+{
+    int N = parent1.size();
+    int crosspoint = static_cast<int> 
+        (this->_rnd.Rannyu(1, N));
+    
+
+    // cout << "crossing point "<< crosspoint<<"\n";
+
+
+    // cout << "parent1 = [";
+    // for(int k=0; k<parent1.size();k++)
+    // {
+    //     if(k==crosspoint) cout << "| ";
+    //     cout << parent1[k]<< " ";
+    // }
+    // cout << "]\n";
+
+    // cout << "parent2 = [";
+    // for(int k=0; k<parent2.size();k++)
+    // {
+    //     if(k==crosspoint) cout << "| ";
+    //     cout << parent2[k]<< " ";
+    // }
+    // cout << "]\n";
+
+    crom support = parent2;
+    
+    for(int k=0; k< crosspoint; k++)
+        // remove from parent2 copy the elements
+        //that are yet in first part of parent 2
+         support.erase(std::remove(
+            support.begin(), 
+            support.end(), 
+            parent1[k]
+        ));
+    
+
+    // cout << "\tspurged parent2\n\t\t";
+    // print(support);
+
+    for(int k=0; k<support.size(); k++)
+    {
+        parent1[k+crosspoint] = support[k]; 
+    }
+
+
+    support = parent1;
+
+    for(int k=0; k< crosspoint; k++)
+        // remove from parent2 copy the elements
+        //that are yet in first part of parent 2
+         support.erase(std::remove(
+            support.begin(), 
+            support.end(), 
+            parent2[k]
+        ));
+
+    // cout << "\tspurged parent1\n\t\t";
+    // print(support);
+    
+    for(int k=0; k<support.size(); k++)
+    {
+        parent2[k+crosspoint] = support[k]; 
+    }
+
+    return {parent1, parent2};
+
+}
+
+/*
+Crossinig operation between two sols
+*/
+pair<crom, crom> crossing::cross(
+    crom parent1, crom parent2, int crosspoint
+)
+{
+    int N = parent1.size();
+
+
+    // cout << "crossing point "<< crosspoint<<"\n";
+
+
+    cout << "parent1 = [";
+    for(int k=0; k<parent1.size();k++)
+    {
+        if(k==crosspoint) cout << "| ";
+        cout << parent1[k]<< " ";
+    }
+    cout << "]\n";
+
+    cout << "parent2 = [";
+    for(int k=0; k<parent2.size();k++)
+    {
+        if(k==crosspoint) cout << "| ";
+        cout << parent2[k]<< " ";
+    }
+    cout << "]\n";
+
+    crom support = parent2;
+    
+    for(int k=0; k< crosspoint; k++)
+        // remove from parent2 copy the elements
+        //that are yet in first part of parent 2
+         support.erase(std::remove(
+            support.begin(), 
+            support.end(), 
+            parent1[k]
+        ));
+    
+
+    cout << "\tspurged parent2\n\t\t";
+    print(support);
+
+    for(int k=0; k<support.size(); k++)
+    {
+        parent1[k+crosspoint] = support[k]; 
+    }
+
+
+    support = parent1;
+
+    for(int k=0; k< crosspoint; k++)
+        // remove from parent2 copy the elements
+        //that are yet in first part of parent 2
+         support.erase(std::remove(
+            support.begin(), 
+            support.end(), 
+            parent2[k]
+        ));
+
+    cout << "\tspurged parent1\n\t\t";
+    print(support);
+    
+    for(int k=0; k<support.size(); k++)
+    {
+        parent2[k+crosspoint] = support[k]; 
+    }
+
+    return {parent1, parent2};
+
+}
+
+

@@ -1,6 +1,7 @@
 #include "map.h"
 #include <fstream>
 #include <iomanip>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -38,12 +39,16 @@ coordinates::coordinates(string filename)
     init_gen();
 
     ifstream in(filename);
+    string line;
+
+    /*IGNORE FIRST 2 LINES*/
+    getline(in, line);
+    getline(in, line);
 
     int counter = 0;
-    string line;
     while (getline(in, line)) {
         counter+=1;
-        //cout << line << endl;
+//        cout << line << endl;
     }
 
     this->_coord = mat(counter, _ndim);
@@ -51,11 +56,27 @@ coordinates::coordinates(string filename)
     in.clear();
     in.seekg(0, std::ios::beg);
 
+    getline(in, line); //ignore first 2 lines
+    getline(in, line); 
+
+    char sep;
+    int cordindex;
+
     for(int i=0; i<counter; i++)
     {
+        //read line
+        getline(in, line);
+
+        //put it in stringstream
+        stringstream data(line);
+        data >> cordindex >> sep; //ignore index
         for(int dim=0; dim < _ndim; dim++)
         {
-            in >> this->_coord(i, dim);
+
+            // getline(data,temp, ',');
+            double as;
+            data>>as >> sep;
+            this->_coord(i, dim)=as;
         }
     }
     in.close();

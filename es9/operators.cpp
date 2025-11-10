@@ -216,7 +216,7 @@ crom mutation::subpermutation(crom sol, int m)
 {
 
     int N = sol.size();
-    if(m>N/2)
+    if(m>(N-1)/2)
     {
         cerr<<"Error: can't perform a permutation "
             <<"of group with this size"<<endl;
@@ -224,54 +224,39 @@ crom mutation::subpermutation(crom sol, int m)
         exit(1);
     }
 
-    crom newsol; 
+    crom newsol=sol; 
 
-    int start;
+    int s1,s2;
 
-    if(m==N/2)
+    //generate the first index
+    s1=static_cast<int>(_rnd.Rannyu(1,N-2*m+1)); 
+
+    //generate s2
+    s2=static_cast<int>(_rnd.Rannyu(s1+m, N-m+1));
+
+    // cout <<"[";
+    // for(int i=0;i<sol.size();i++)
+    // {
+    //     if(i==s1||i==s1+m || i==s2 || i==s2+m)
+    //         cout <<"|";
+    //     cout <<sol[i]<<" ";
+    // }
+    // cout <<"]\n";
+
+    for(int k=0; k<m; k++)
     {
-        if ((N-1)%2==0)
-        {
-            newsol = swap(
-                sol, 1, 
-                (N-1)/2 +1,
-                 (N-1)/2
-            );
-        }
-        else { // 3 possibilities
-            double r = this->_rnd.Rannyu();
-            if (r<=0.5)
-            {
-                start = 1;
-                if(r<0.25)
-                {
-                    newsol = swap(
-                        sol, 
-                        start,
-                        (N)/2,
-                        (N-1)/2   
-                    );
-                }else {
-                    newsol = swap(
-                        sol, 
-                        start,
-                        (N+1)/2,
-                        (N-1)/2   
-                    );
-                }
-            }
-            else {
-                start = 2;
-                newsol = swap(
-                    sol, 
-                    start,
-                    (N+1)/2,
-                    (N-1)/2   
-                );
-            }            
-        }
-    }          
+        newsol[s1+k]=sol[s2+k];
+        newsol[s2+k]=sol[s1+k];
+    }
 
+    // cout <<"[";
+    // for(int i=0;i<newsol.size();i++)
+    // {
+    //     if(i==s1||i==s1+m || i==s2 || i==s2+m)
+    //         cout <<"|";
+    //     cout <<newsol[i]<<" ";
+    // }
+    // cout <<"]\n";
 
     return newsol;
 }

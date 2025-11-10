@@ -6,6 +6,7 @@
 #include <armadillo>
 #include <cstdlib>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <ostream>
 #include <set>
@@ -18,15 +19,17 @@ population::population(coordinates &map, int n): sel(map)
 
     this->_pop_size=n;
 
+    // first vector to generate others
     crom ordered (map.get_ncities());
-
     //fill 
     std::iota(ordered.begin(), ordered.end(), 1);
 
+    //initialize vectors
     _population = vector<crom> (_pop_size);
     _new_population = vector<crom> (_pop_size);
     _pop_costs = vector<double>(_pop_size);
 
+    //generate population shuffling ordered[1:]
     for(int i=0; i<n; i++)
     {
         random_shuffle(ordered.begin()+1, ordered.end());
@@ -34,6 +37,7 @@ population::population(coordinates &map, int n): sel(map)
 
     }
 
+    // check if anything went wrong
     if(!check_population())
     {
         cerr<< "Error: population generated not correctly."
@@ -41,12 +45,24 @@ population::population(coordinates &map, int n): sel(map)
         exit(1);
     }
 
+}
+
+
+void population::initialize_files()
+{
+
     //initialize best file
     out.open(best_filename);
     out << "# best solutions" << endl;
-    
-}
+    out.close();
 
+    //initialize best file
+    out.open(avg_filename);
+    out << "# best half averages" << endl;
+    out.close();
+
+
+}
 
 population::~population() 
 {
@@ -65,7 +81,6 @@ bool population::check_population(bool _new)
         if (!this->check_solution(i, _new))
         {
             cerr << "Population corrupted at index "<<i<<"\n";
-
             print("", _new);
             return false;
         }    
@@ -73,7 +88,6 @@ bool population::check_population(bool _new)
 
     return true;
 }
-
 
 bool population::check_solution(int i, bool _new)
 {
@@ -93,7 +107,6 @@ bool population::check_solution(int i, bool _new)
     bool wasUnique = (s.size()==(*pop)[i].size());
     return wasUnique;
 }
-
 
 
 void population::print(string prefactor, bool _new)
@@ -122,9 +135,6 @@ void population::print(string prefactor, bool _new)
 
 
 
-/*
-Compute cost of a vector of cromosomes
-*/
 void population::compute_costs()
 {
      
@@ -135,12 +145,10 @@ void population::compute_costs()
             _population[k]
         );
     }
+
+    this->cost_evaluated=true;
 }
 
-/*
-Return cost of i-th member of the population
-To execute only after compute_prob1  
-*/
 double population::evaluate_sol(int i)
 {
     return this->_pop_costs[i];
@@ -148,17 +156,13 @@ double population::evaluate_sol(int i)
 
 
 
-/*
-Compute probabilities of the solutions and store it 
-in the _pop_costs vector using the distance between cities
-*/
 void population::compute_prob1()
 {
 
     //store costs in _pop_costs vector
     this->compute_costs();
     
-    //
+    // compute norm of costs 
     double norm = sqrt(std::inner_product(
         this->_pop_costs.begin(), this->_pop_costs.end(),
         this->_pop_costs.begin(), 0.  
@@ -184,6 +188,7 @@ void population::compute_prob1()
         this->_pop_costs.begin(), 0.  
     );
 
+    // check newnorm compatible with 1
     double eps=1e-5;
     if ((newnorm<1-eps)||(newnorm>1+eps))
     {
@@ -198,6 +203,11 @@ void population::compute_prob1()
 
 int population::selection_prob1() //O(N)
 {
+    if(!cost_evaluated)
+    {
+        cerr<<"Error: cost not evaluated\n";
+        exit(1);
+    }
     double part_sum=0.;
     double r = this->_rnd.Rannyu();
 
@@ -230,20 +240,22 @@ int population::selection_prob2(double p)   //O(1)
 
 void population::save_population_best()
 {
-
     int best_index=0;
     double min_cost=this->sel.evaluate_sol(_population[0]);
-    for(int k=1; k<_population.size(); k++)
+    if(!this->sorted)
     {
-        double cost=this->sel.evaluate_sol(_population[k]);
-        if(cost<min_cost)
+        for(int k=1; k<_population.size(); k++)
         {
-            min_cost=cost;
-            best_index=k;
+            double cost=this->sel.evaluate_sol(_population[k]);
+            if(cost<min_cost)
+            {
+                min_cost=cost;
+                best_index=k;
+            }
         }
     }
 
-    ofstream out(best_filename, ios::app);
+    out.open(best_filename, ios::app);
     for(int j:_population[best_index])
     {
         out <<j<<", ";
@@ -251,10 +263,58 @@ void population::save_population_best()
     out<<_population[best_index][0]<<","<<min_cost;
     out<<endl;
 
+    out.close();
     return;
 }
 
 
+void population::save_avg_cost()
+{
+    if(!this->sorted) this->sort_population();
+    this->_avg_cost=0.;
+
+    if(this->cost_evaluated)
+    {
+        for(int k=0; k<_pop_size/2; k++)
+        {
+            this->_avg_cost+=_pop_costs[k];
+        }    
+    }
+    else {
+        for(int k=0; k<_pop_size/2; k++)
+        {
+            this->_avg_cost+=this->sel.evaluate_sol(_population[k]);
+        }
+    }
+
+    this->_avg_cost /= double( _pop_size/2 );
+
+
+    out.open(avg_filename, ios::app);
+    out << this->_avg_cost<<endl;
+    out.close();
+
+    return;
+}
+
+
+void population::subpermutation(int k)
+{
+    int m;
+    if(this->_rnd.Rannyu()<mutation_prob[3])
+    {
+        m = this->_rnd.Rannyu(
+            1, (_new_population[k].size()-1)/2
+        );
+        // cout << "Subpermutation of " <<m<<" elements\n";
+        
+
+        _new_population[k] = this->mut.subpermutation(
+            _new_population[k], m);
+    }
+
+    return;
+}
 
 
 void population::inversion(int k)
@@ -320,13 +380,9 @@ void population::evolve()
 
     for(int k=0; k<_population.size()/2; k++)
     {
-        // cout << "evolution iteration "<<k<<endl;
         int index1=(this->*prob)(),
             index2=(this->*prob)();
     
-        // cout << "index 1" << index1<<"\n"
-        //      << "index 2" << index2<<"\n"
-        //      <<"size "<<_population.size()<<"\n";
 
         //crossing
         if(this->_rnd.Rannyu()<cross_prob) //crossing 
@@ -345,9 +401,6 @@ void population::evolve()
             //subsitute with sons
             _new_population[2*k] = sons.first;
             _new_population[2*k+1]=sons.second;
-            // cout << "crossing done\n";
-            // this->check_solution(2*k, true);
-            // this->check_solution(2*k+1, true);
             
         }
         else {
@@ -371,6 +424,11 @@ void population::evolve()
         this->shift(2*k);
         this->shift(2*k+1);
 
+        // subpermutation
+        this->subpermutation(2*k);
+        this->subpermutation(2*k+1);
+
+
 
     }
     if(this->check_population(true))
@@ -379,30 +437,23 @@ void population::evolve()
         this->_population = _new_population;
         this->_new_population=vector<crom> (_pop_size);
         this->_pop_costs = vector<double> (_pop_size);
+        this-> cost_evaluated = false;
+        this-> sorted = false;
     }else
-    {
-        
+    {        
         exit(1);
     }
-
-    
-
     return;
 }
 
 
-/*
-merge sort based on the coordinates cost
-*/
 void population::sort_population()
 {
     this->_population = merge_cost(this->_population);
+    this->sorted=true;
     return;
 }
 
-/*
-merge sort based on the coordinates cost
-*/
 vector<crom> population::merge_cost(vector<crom> &pop)
 {
 
@@ -453,15 +504,48 @@ vector<crom> population::merge_cost(vector<crom> &pop)
 void population::set_mutation_probability(
     double p_inversion,
     double p_permutation,
-    double p_shift 
+    double p_shift,
+    double p_subpermutation
 )
 {
     mutation_prob[0]=p_inversion;
     mutation_prob[1]=p_permutation;
     mutation_prob[2]=p_shift;
+    mutation_prob[3]=p_subpermutation;
 
 }
 
 
 
+void population::set_best_filename(string filename)
+{
+    best_filename=filename;
+}
 
+void population::set_avg_filename(string filename)
+{
+    avg_filename=filename;
+}
+
+void population::print_sol(int k, bool _new)
+{
+    cout<<"[";
+    if(_new)
+    {
+        for(int i: this->_new_population[k])
+            cout<<i<<" ";
+    }
+    else {
+        for(int i: this->_population[k])
+            cout<<i<<" ";
+    
+    }
+    cout<<"]\n";
+    return;
+}
+
+void population::initialize_newpop()
+{
+    this->_new_population=this->_population;
+    return;
+}

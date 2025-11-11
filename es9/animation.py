@@ -44,8 +44,9 @@ def plot_square(ax):
     '--shape', type=str, help = 'type of shape',
     default='circle'
 )
+@click.option('--figtitle', type=str, default='')
 def animation(
-    coord_file, sol_file, gif_name, shape
+    coord_file, sol_file, gif_name, shape,figtitle
 ):
     coord = pd.read_csv(coord_file, skiprows=1)
     coord
@@ -53,6 +54,7 @@ def animation(
 
     Figure , ax = plt.subplots(2,1,figsize=(5, 8), gridspec_kw={'height_ratios': [5, 3]})
 
+    Figure.suptitle(figtitle)
 
     if(shape == 'circle'):
         plot_circle(ax)

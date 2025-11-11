@@ -298,6 +298,35 @@ void population::save_avg_cost()
 }
 
 
+void population::save_best_half(string filename, int iteration)
+{
+    out.open(filename, ios::app);
+    if(!this->sorted) this->sort_population();
+ 
+    out << iteration;
+    if(this->cost_evaluated)
+    {
+        for(int k=0; k<_pop_size/2; k++)
+        {
+            out <<","<< _pop_costs[k];
+        }    
+    }
+    else {
+        for(int k=0; k<_pop_size/2; k++)
+        {
+            
+            out <<","<< this->sel.evaluate_sol(_population[k]);
+        }
+    }
+
+    out << "\n";
+    out.close();
+
+    return;
+}
+
+
+
 void population::subpermutation(int k)
 {
     int m;

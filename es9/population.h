@@ -74,6 +74,7 @@ class population
 
         /*save on file average of population's best half*/        
         void save_avg_cost();
+        void save_best_half(string filename, int iteration);
 
         void initialize_files();
 

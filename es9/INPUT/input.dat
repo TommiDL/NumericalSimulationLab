@@ -1,0 +1,11 @@
+COORD_FILE              coord_SQUARE_34cities.dat
+BEST_FILENAME           square_setup3/best_sol_square_seed20.dat
+AVG_FILENAME            square_setup3/avg_square_seed20.dat
+SETUP_FILENAME		square_setup3/setup.dat
+PROB_INVERSION          0.3
+PROB_PERMUTATION        0.3
+PROB_SHIFT              0.3
+PROB_SUBPERMUTATION     0.3
+PROB_CROSSING           0.8
+NSTEPS                  1000
+METRICS                 L2

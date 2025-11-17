@@ -13,9 +13,17 @@
 #include <vector>
  
 
+population::population(coordinates &map): sel(map)
+{
+    init_gen(_rnd);
+    this->_ncities=map.get_ncities();
+}
+
+
 population::population(coordinates &map, int n): sel(map)
 {
     init_gen(_rnd);
+    this->_ncities=map.get_ncities();
 
     this->_pop_size=n;
 
@@ -48,16 +56,156 @@ population::population(coordinates &map, int n): sel(map)
 }
 
 
+
+void population::generate_initial_population(int n)
+{
+
+    this->_pop_size=n;
+
+    // first vector to generate others
+    crom ordered (_ncities);
+    //fill 
+    std::iota(ordered.begin(), ordered.end(), 1);
+
+    //initialize vectors
+    _population = vector<crom> (_pop_size);
+    _new_population = vector<crom> (_pop_size);
+    _pop_costs = vector<double>(_pop_size);
+
+    //generate population shuffling ordered[1:]
+    for(int i=0; i<n; i++)
+    {
+        random_shuffle(ordered.begin()+1, ordered.end());
+        _population[i]=ordered;
+
+    }
+
+    // check if anything went wrong
+    if(!check_population())
+    {
+        cerr<< "Error: population generated not correctly."
+            <<" Repetition are present inside some solutions" << endl;
+        exit(1);
+    }
+}
+
+void population::initialize(string inputfile)
+{
+    ifstream read ("INPUT/"+inputfile);
+    if(!read.is_open())
+    {
+        cerr << "ERROR: cannot open file INPUT/"+inputfile<<"\n";
+        exit(1);
+    }
+
+    string property;
+    string file;
+    double prob;
+    int ncities;
+    
+    while(!read.eof())
+    {
+        read >> property;
+    
+        if(property == "BEST_FILENAME")
+        {
+            read >> file;
+            this->set_best_filename(file);
+        }
+        else if(property == "AVG_FILENAME")
+        {
+            read >> file;
+            this->set_avg_filename(file);
+        }
+        else if(property == "SETUP_FILENAME")
+        {
+            read >> file;
+            this->set_setup_filename(file);
+        }
+        else if(property == "PROB_INVERSION")
+        {
+            read >> prob;
+            this->mutation_prob[0]=prob;
+        }
+        else if(property == "PROB_PERMUTATION")
+        {
+            read >> prob;
+            this->mutation_prob[1]=prob;
+        }
+        else if(property == "PROB_SHIFT")
+        {
+            read >> prob;
+            this->mutation_prob[2]=prob;
+
+        }
+        else if(property == "PROB_SUBPERMUTATION")
+        {
+            read >> prob;
+            this->mutation_prob[3]=prob;
+
+        }
+        else if(property == "PROB_CROSSING")
+        {
+            read >> prob;
+            this->cross_prob=prob;
+        }
+        else if(property == "NSTEPS")
+        {
+            read >> _evolution_steps;
+        }
+        else if(property == "POP_SIZE")
+        {
+            read >> _pop_size;
+        }
+        else if(property == "METRICS")
+        {
+            string metr;
+            read >> metr;
+            this->sel.set_metric(metr);
+        }
+        else if(property == "PATH")
+        {
+            read >> file;
+            out.open(setup_filename);
+            if(!out.is_open())
+            {
+                cerr << "ERROR: cannot open setup file " << setup_filename<<"\n";
+                exit(1);
+            }
+            out << "PATH " << file<<endl;
+            out.close();
+        }
+    }
+    read.close();
+    this->generate_initial_population(_pop_size);
+
+    
+    this->initialize_files();
+    this->print_setup();
+
+    return;
+}
+
 void population::initialize_files()
 {
 
     //initialize best file
     out.open(best_filename);
+    if(!out.is_open())
+    {
+        cerr << "Error: cannot open file "<<best_filename<<"\n";
+        exit(1);
+    }
     out << "# best solutions" << endl;
     out.close();
 
     //initialize best file
     out.open(avg_filename);
+    if(!out.is_open())
+    {
+        cerr << "Error: cannot open file "<<avg_filename<<"\n";
+        exit(1);
+    }
     out << "# best half averages" << endl;
     out.close();
 
@@ -548,12 +696,17 @@ void population::set_mutation_probability(
 
 void population::set_best_filename(string filename)
 {
-    best_filename=filename;
+    best_filename="OUTPUT/"+filename;
 }
 
 void population::set_avg_filename(string filename)
 {
-    avg_filename=filename;
+    avg_filename="OUTPUT/"+filename;
+}
+
+void population::set_setup_filename(string filename)
+{
+    setup_filename="OUTPUT/"+filename;
 }
 
 void population::print_sol(int k, bool _new)
@@ -573,8 +726,42 @@ void population::print_sol(int k, bool _new)
     return;
 }
 
-void population::initialize_newpop()
+/*void population::initialize_newpop()
 {
     this->_new_population=this->_population;
+    return;
+}*/
+
+void population::print_setup()
+{
+    out.open(this->setup_filename);
+    out << "Number of cities = "<<this->sel.get_ncities()<<"\n";
+    out << "Population size = "<<this->_pop_size<<"\n";
+    out << "Crossing probability = "<<this->cross_prob<<"\n";
+
+    out << "Inversion probability = "<<this->mutation_prob[0]<<"\n";
+    out << "Permutation probability = "<<this->mutation_prob[1]<<"\n";
+    out << "Shift probability = "<<this->mutation_prob[2]<<"\n";
+    out << "Subpermutation probability = "<<this->mutation_prob[3]<<"\n";
+
+    out.close();
+
+}
+
+void population::perform_evolution()
+{
+    cout << "Evolution started\n";
+    for(int j=0; j<_evolution_steps; j++)
+    {
+        this->evolve();
+        this->save_population_best();
+        this->save_avg_cost();
+        progress(j, _evolution_steps);
+    }
+    cout<<RESET<<endl;
+
+    //pop.print();
+    cout << "Evolution ended"<<endl;
+
     return;
 }

@@ -26,7 +26,7 @@ class selection
         void set_metric(string norm = "L1");
         double evaluate_sol(crom sol);
         
-
+        int get_ncities(){return this->_map->get_ncities();};
 
     private:
 

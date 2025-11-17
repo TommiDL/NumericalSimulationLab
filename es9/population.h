@@ -19,10 +19,12 @@ class population
 {
     public:
         population(coordinates &map, int n);
+        population(coordinates &map);
+        
 
         ~population();
 
-
+        void initialize(string inputfile="input.dat");
         /*Print population
 
         @param string prefactor: string to print before the single population's member
@@ -62,7 +64,7 @@ class population
 
 
         /*save population best solution on file*/
-        void save_population_best();
+        void save_population_best(); 
 
         /*merge sort based on the coordinates cost*/
         void sort_population();
@@ -72,6 +74,11 @@ class population
         /*set path to save average of population's best half*/        
         void set_avg_filename(string filename);
 
+        /*set path to save average of population's best half*/        
+        void set_setup_filename(string filename);
+
+        void set_nsteps(int nsteps);
+
         /*save on file average of population's best half*/        
         void save_avg_cost();
         void save_best_half(string filename, int iteration);
@@ -80,12 +87,15 @@ class population
 
         void print_sol(int k, bool _new=false);
 
-        void initialize_newpop();
+        //void initialize_newpop();
+        void print_setup();
 
+
+        void perform_evolution();
 
     private:
 
-        int _pop_size=10;
+        int _pop_size=10, _evolution_steps=100, _ncities;
         vector<crom> _population;       //actual population
         vector<crom> _new_population;   //new proposed population
         crom _best;                     //store best sol of actual population
@@ -103,7 +113,7 @@ class population
         vector<double> mutation_prob = vector<double>(4, 0.1);
         double cross_prob=0.5;
 
-        
+        void generate_initial_population(int n);
         /*Compute cost (total distance) of a vector of cromosomes*/
         void compute_costs();
 
@@ -156,7 +166,8 @@ class population
         
         ofstream out;
         string best_filename = "OUTPUT/best_sol.dat";  
-        string avg_filename  = "OUTPUT/avg_cost.dat";    
+        string avg_filename  = "OUTPUT/avg_cost.dat";
+        string setup_filename = "OUTPUT/setup.dat";    
 
 };
 

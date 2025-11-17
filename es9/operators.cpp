@@ -6,7 +6,6 @@
 #include <armadillo>
 #include <cassert>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <ostream>
 #include <string>

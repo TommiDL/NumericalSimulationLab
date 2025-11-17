@@ -1,10 +1,17 @@
 #include "map.h"
+#include <cstdlib>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
+
+coordinates::coordinates()
+{
+    init_gen();
+}
 
 coordinates::coordinates(int n, string path)
 {
@@ -37,51 +44,8 @@ coordinates::coordinates(int n, string path)
 coordinates::coordinates(string filename)
 {
     init_gen();
+    this->read_from_file(filename);
 
-    ifstream in(filename);
-    string line;
-
-    /*IGNORE FIRST 2 LINES*/
-    getline(in, line);
-    getline(in, line);
-
-    int counter = 0;
-    while (getline(in, line)) {
-        counter+=1;
-//        cout << line << endl;
-    }
-
-    this->_coord = mat(counter, _ndim);
-    
-    in.clear();
-    in.seekg(0, std::ios::beg);
-
-    getline(in, line); //ignore first 2 lines
-    getline(in, line); 
-
-    char sep;
-    int cordindex;
-
-    for(int i=0; i<counter; i++)
-    {
-        //read line
-        getline(in, line);
-
-        //put it in stringstream
-        stringstream data(line);
-        data >> cordindex >> sep; //ignore index
-        for(int dim=0; dim < _ndim; dim++)
-        {
-
-            // getline(data,temp, ',');
-            double as;
-            data>>as >> sep;
-            this->_coord(i, dim)=as;
-        }
-    }
-    in.close();
-
-    this->_ncities=counter;
 }
 
 coordinates::coordinates(mat coord)
@@ -94,18 +58,94 @@ coordinates::coordinates(mat coord)
 }
 
 
-/*
-return the coordinates corresponding to as a vec
-*/
+void coordinates::initialize(string inputfile)
+{
+    ifstream read("INPUT/"+inputfile);
+    if(!read.is_open())
+    {
+        cerr << "ERROR: cannot open file INPUT/"<<inputfile<<"\n";
+        exit(1);
+    }
+
+    bool def1 = false, def2 = false;
+
+    string property, path="circle";
+    while(!read.eof())
+    {
+        read >> property;
+    
+        if(property == "NCITIES")
+        {
+            read >> _ncities;
+            def1=true;
+
+        }
+        else if(property == "PATH")
+        {
+            read >> path;
+            def1=true;
+        }
+        else if (property == "COORD_FILE") 
+        {
+            read >>path;
+            def2=true;
+            // this->read_from_file(path);
+        }
+    }
+    if(def1 && def2)
+    {
+        cerr << "Error: Multiple definition of coodinates in file INPUT/"
+             << inputfile << "\n";
+        exit(1);
+    }
+    if(!(def1 || def2 ) )
+    {
+        cerr<<"Error: No definition of coordinates in input file INPUT/"
+            <<inputfile<<"\n";
+            exit(1);
+    }
+    if(def2)
+    {
+        this->read_from_file(path);
+    }
+    else {
+        this->_coord = mat(_ncities, _ndim);
+    
+
+      // convert to lower case
+        std::transform(
+            path.begin(), path.end(), 
+            path.begin(), 
+            ::toupper
+        );
+
+
+        if(path == "CIRCLE")
+        {
+            fill_circle();
+        }
+        else
+        {    
+            fill_square();
+        }
+
+        this->save_coordinates(
+            "coord_"+path+
+                "_"+to_string(_ncities)+"cities.dat"
+        );
+    }
+
+    return;
+
+}
+
+
 vec coordinates::get_coord(int n) 
 {
     check_index(n-1);
     return this->_coord.row(n-1).as_col();
 }
 
-/*
-return the eucledian distance between the cities n and m
-*/
 double coordinates::dist(int n, int m)
 {
 
@@ -113,18 +153,12 @@ double coordinates::dist(int n, int m)
     return norm(dif );
 }
 
-/*
-return the quadratic eucledian distance between the cities n and m
-*/
 double coordinates::dist2(int n, int m)
 {
     vec dif = this->get_coord(n)-this->get_coord(m);
     return dot(dif, dif);
 }
 
-/*
-return the eucledian lenght of the ...
-*/
 double coordinates::L1(vector<int> cities)
 {
     double cost = 0;
@@ -238,3 +272,60 @@ void coordinates::save_coordinates(string filename)
     }
 }
 
+void coordinates::read_from_file(string filename)
+{
+
+    ifstream in(filename);
+    if(!in.is_open())
+    {
+        cerr<<"ERROR: cannot open coordinates file "
+            <<filename<<"\n";
+        exit(1);
+    }
+    string line;
+
+    /*IGNORE FIRST 2 LINES*/
+    getline(in, line);
+    getline(in, line);
+
+    // count number of cities
+    int counter = 0;
+    while (getline(in, line)) {
+        counter+=1;
+    }
+
+    //init matrix
+    this->_coord = mat(counter, _ndim);
+   
+    //reset stream
+    in.clear();
+    in.seekg(0, std::ios::beg);
+
+    getline(in, line); //ignore first 2 lines
+    getline(in, line); 
+
+    char sep;
+    int cordindex;
+
+    for(int i=0; i<counter; i++)
+    {
+        //read line
+        getline(in, line);
+
+        //put it in stringstream
+        stringstream data(line);
+        data >> cordindex >> sep; //ignore index
+        for(int dim=0; dim < _ndim; dim++)
+        {
+
+            // getline(data,temp, ',');
+            double as;
+            data>>as >> sep;
+            this->_coord(i, dim)=as;
+        }
+    }
+    in.close();
+
+    this->_ncities=counter;
+
+}

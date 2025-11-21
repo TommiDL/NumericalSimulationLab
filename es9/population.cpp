@@ -744,6 +744,7 @@ void population::print_setup()
     out << "Shift probability = "<<this->mutation_prob[2]<<"\n";
     out << "Subpermutation probability = "<<this->mutation_prob[3]<<"\n";
 
+    out << "Number of evolution steps = "<< this->_evolution_steps << endl;
     out.close();
 
 }

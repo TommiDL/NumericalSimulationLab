@@ -95,7 +95,7 @@ class population
 
     private:
 
-        int _pop_size=10, _evolution_steps=100, _ncities;
+        int _pop_size=100, _evolution_steps=100, _ncities;
         vector<crom> _population;       //actual population
         vector<crom> _new_population;   //new proposed population
         crom _best;                     //store best sol of actual population

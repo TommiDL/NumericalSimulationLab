@@ -24,7 +24,8 @@ int main()
     coord.print();
     cout << "---end of coord --\n";
 
-    population pop(coord, dimpop);
+    population pop(coord);
+    // population pop(coord, dimpop);
     //pop.print();
 
 

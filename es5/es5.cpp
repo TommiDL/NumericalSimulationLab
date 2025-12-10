@@ -1,5 +1,6 @@
 #include "../es1/func.h"
 #include "probability.h"
+#include <fstream>
 
 using namespace std;
 
@@ -16,8 +17,8 @@ vector<double> metropolis(
 	const vector <double> x0, 
 	prob p, 
 	Random& rnd, double sigma,
-	string flag="gauss"//,
-	//float &acceptance_rate=NULL
+	vector<float> &acceptance_rate,
+	string flag="gauss"
 )
 {
 	vector<double> x (3); 
@@ -51,11 +52,44 @@ vector<double> metropolis(
 
 	if (r<=alpha)
 	{
+		acceptance_rate.push_back(acceptance_rate.back()+1);	
 		return x;
 	}else
 	{
+		acceptance_rate.push_back(acceptance_rate.back());	
  		return x0;
 	}
+
+
+}
+
+void read_input(double &sigma, int &nblocks, int &nthrows)
+{
+	ifstream input("input.dat");
+
+	string property;
+
+	while(!input.eof())
+	{
+		input >> property;
+		if(property == "SIGMA")
+		{
+			input >> sigma;
+
+		}
+		else if (property=="NBLOCKS") 
+		{
+		 	input>>nblocks;
+		}
+		else if (property == "NTHROWS") {
+			input >> nthrows;
+		}
+		else {
+			cerr << "UNEXPECTED INPUT\n";
+			exit(1);
+		}
+	}
+
 }
 
 
@@ -96,7 +130,7 @@ void compute_orbital_ray(
 	vector<int> thr(nblocks);
 	iota(thr.begin(), thr.end(), 0);
 	vector<double> x(x0);
-	
+	vector <float> acceptance(1, 0.);
 	ofstream out("data/"+position_file);
 	
 	if(!out.is_open())
@@ -112,7 +146,7 @@ void compute_orbital_ray(
 		double sum=0;
 		for(int j=0; j<nthr; ++j)
 		{
-			x = metropolis(x, p, rnd, sigma, initial_distribution); 
+			x = metropolis(x, p, rnd, sigma, acceptance, initial_distribution); 
 			
 			//print points on file
 			out<<j<<","<<x[0]<<","<<x[1]<<","<<x[2]<<endl;
@@ -151,6 +185,13 @@ void compute_orbital_ray(
 	//save data
 	string datafile="data/"+ray_values_file;
 	save_data(thr, sum_prog, err, datafile);
+
+	//save acceptance
+	vector <int> t(nthrows+1);
+	std::iota(t.begin(), t.end(), 0);
+	save_data(t, acceptance, "data/acceptance_"+position_file);
+
+
 	
 	
 }
@@ -163,65 +204,71 @@ int main(int argc, char* argv[])
 	int nblocks=100;
 	int nthrows=1000000;
 	
-	
+	// double sigma;
+	// read_input(sigma, nblocks, nthrows);
+
 	cout<<"\n\t\t--> Computing 1s orbital <--\n"<<endl;
 	compute_orbital_ray(
 		p_1s, x0, "pos_1s_unif.csv", "ray_1s_unif.csv", 
-		"uniform", 0.5, nblocks, nthrows
+		"uniform", 
+		1.2, nblocks, nthrows
 	);
 	compute_orbital_ray(
 		p_1s, x0, "pos_1s_gauss.csv", "ray_1s_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
+		"gauss", 
+		0.8, nblocks, nthrows
 	);
 
 	cout<<"\n\t\t--> Computing 2p m=0 orbital <--\n"<<endl;
 	x0={1., 1., 1.};
 	compute_orbital_ray(
 		p_2p, x0, "pos_2p_unif.csv", "ray_2p_unif.csv", 
-		"uniform", 0.5, nblocks, nthrows
+		"uniform", 
+		3.0, nblocks, nthrows
 	);
 	compute_orbital_ray(
 		p_2p, x0, "pos_2p_gauss.csv", "ray_2p_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
+		"gauss", 
+		1.8, nblocks, nthrows
 	);
 	
 	
-	//other distributions
+	// //other distributions
 
-	cout<<"\n\t\t--> Computing 2p m=1 orbital <--\n"<<endl;
-	x0={1., 1., 1.};
-	compute_orbital_ray(
-		p_2pm1, x0, "pos_2p_m1_gauss.csv", "ray_2p_m1_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
-	);
+	// cout<<"\n\t\t--> Computing 2p m=1 orbital <--\n"<<endl;
+	// x0={1., 1., 1.};
+	// compute_orbital_ray(
+	// 	p_2pm1, x0, "pos_2p_m1_gauss.csv", "ray_2p_m1_gauss.csv", 
+	// 	"gauss", sigma, nblocks, nthrows
+	// );
 
-	cout<<"\n\t\t--> Computing 2s orbital <--\n"<<endl;
-	x0={0., 0., 0.};
-	compute_orbital_ray(
-		p_2s, x0, "pos_2s_gauss.csv", "ray_2s_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
-	);
+	// cout<<"\n\t\t--> Computing 2s orbital <--\n"<<endl;
+	// x0={0., 0., 0.};
+	// compute_orbital_ray(
+	// 	p_2s, x0, "pos_2s_gauss.csv", "ray_2s_gauss.csv", 
+	// 	"gauss", sigma, nblocks, nthrows
+	// );
 
-	cout<<"\n\t\t--> Computing 3s orbital <--\n"<<endl;
-	x0={0., 0., 1.};
-	compute_orbital_ray(
-		p_3s, x0, "pos_3s_gauss.csv", "ray_3s_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
-	);
+	// cout<<"\n\t\t--> Computing 3s orbital <--\n"<<endl;
+	// x0={0., 0., 1.};
+	// compute_orbital_ray(
+	// 	p_3s, x0, "pos_3s_gauss.csv", "ray_3s_gauss.csv", 
+	// 	"gauss", sigma, nblocks, nthrows
+	// );
 
-	cout<<"\n\t\t--> Computing 3p m=0 orbital <--\n"<<endl;
-	x0={1., 1., 1.};
-	compute_orbital_ray(
-		p_3pm0, x0, "pos_3p_m0_gauss.csv", "ray_3p_m0_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
-	);
+	// cout<<"\n\t\t--> Computing 3p m=0 orbital <--\n"<<endl;
+	// x0={1., 1., 1.};
+	// compute_orbital_ray(
+	// 	p_3pm0, x0, "pos_3p_m0_gauss.csv", "ray_3p_m0_gauss.csv", 
+	// 	"gauss", sigma, nblocks, nthrows
+	// );
 
-	cout<<"\n\t\t--> Computing 3d m=0 orbital <--\n"<<endl;
-	x0={1., 1., 1.};
-	compute_orbital_ray(
-		p_3dm0, x0, "pos_3d_m0_gauss.csv", "ray_3d_m0_gauss.csv", 
-		"gauss", 0.5, nblocks, nthrows
-	);
+	// cout<<"\n\t\t--> Computing 3d m=0 orbital <--\n"<<endl;
+	// x0={1., 1., 1.};
+	// compute_orbital_ray(
+	// 	p_3dm0, x0, "pos_3d_m0_gauss.csv", "ray_3d_m0_gauss.csv", 
+	// 	"gauss", sigma, nblocks, nthrows
+	// );
 	
 	return 0;
 }

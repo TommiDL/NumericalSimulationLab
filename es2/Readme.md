@@ -359,7 +359,7 @@ ax[0].plot(diff_m.N, diffuse(diff_m.N, popt[0]), label=f'fit k = {"%.2f" % popt[
 ax[0].grid(True)
 ax[0].set_xlabel('N [step]')
 ax[0].set_ylabel('<r(N)>')
-ax[0].set_title('Distance explored by 10^4 RWs')
+ax[0].set_title('Distance explored by $10^4$ RWs')
 ax[0].legend()
 
 
@@ -419,7 +419,7 @@ ax[0].plot(diff_m.N, diffuse(diff_m.N, popt[0]), label=f'fit k = {"%.2f" % popt[
 ax[0].grid(True)
 ax[0].set_xlabel('N [step]')
 ax[0].set_ylabel('<r(N)>')
-ax[0].set_title('Distance explored by 10^4 RWs')
+ax[0].set_title('Distance explored by $10^4$ RWs')
 ax[0].legend()
 
 
@@ -458,7 +458,4 @@ plt.show()
     
 
 
-
-```python
-
-```
+It's visible how the lattice RW seem to explore the space faster than the continuous version 

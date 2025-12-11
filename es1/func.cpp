@@ -13,8 +13,8 @@ double error( const vector<double> &AV, const vector<double> &AV2, int n )
 }
 
 int* complement_seeds(
-	string filename, //="/home/tommaso/LSN/Parallel_number_generator_20250306/Primes",
-	int row //= 0
+	string filename, 
+	int row 
 )
 {
 	/*
@@ -47,8 +47,8 @@ int* complement_seeds(
 
 void set_seed(
 	Random &rnd,
-	string seedfile,//="/home/tommaso/LSN/Parallel_number_generator_20250306/seed.in",
-	string primesname//="/home/tommaso/LSN/Parallel_number_generator_20250306/Primes"
+	string seedfile,
+	string primesname
 )
 {
 

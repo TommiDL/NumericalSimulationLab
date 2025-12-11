@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
- 
+
 
 #include "func.h"
 using namespace std;
@@ -15,8 +15,8 @@ int main(int argc, char* argv[])
 	   	return 1;
 		
 	}
-	int M=atoi(argv[1]); // total number of throws
-	int N=100; // number of blocks
+	int M=1000000; // total number of throws
+	int N=atoi(argv[1]); // number of blocks
 	
 	int L=M/N; //number of throws per block
 	
@@ -38,12 +38,12 @@ int main(int argc, char* argv[])
 
 
 		
-	vector<float> ave (N, 0); //averages on blocks
-	vector<float> av2 (N, 0); //averages squared on blocks
+	vector<double> ave (N, 0); //averages on blocks
+	vector<double> av2 (N, 0); //averages squared on blocks
 	
-	vector<float> sum_prog (N, 0);
-	vector<float> su2_prog (N, 0);
-	vector<float> err_prog (N, 0);
+	vector<double> sum_prog (N, 0);
+	vector<double> su2_prog (N, 0);
+	vector<double> err_prog (N, 0);
 
 	//cout<<"computing averages"<<endl;
 	for(int i=0; i<N; ++i) //iterate on blocks

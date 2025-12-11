@@ -46,19 +46,24 @@ int main(int argc, char* argv[])
 //	for(int run=0; run<N; ++run)
 	for(int block=0; block<nblock; ++block)
 	{
-		for(int l=0; l<L; ++l)
+		for(int l=0; l<L; ++l) // for each block make L RWs
 		{	
 				
 			int run=L*block+l;
 			
+			/*****************       new RW          ******************/
+
 			vector<double> point = rw.get_pos();
-			out<<run<<","<<rw.get_nstep()<<","
+			// save initial step
+			out <<run<<","<<rw.get_nstep()<<","
 				<<point[0]<<","<<point[1]<<","<<point[2]<<endl;
-			//if(l%4==0)
-			//	cout<<run<<endl;
+			
+
 			for (int k=0; k<M; ++k) //for on steps
 			{
 				rw.make_step();
+				
+				// save step
 				point=rw.get_pos();
 				out<<run<<","<<rw.get_nstep()
 					<<","<<point[0]<<","<<point[1]<<","<<point[2]<<endl;
@@ -73,9 +78,10 @@ int main(int argc, char* argv[])
 				
 			}
 			
-			rw.reset_rw();
+			rw.reset_rw(); // reset the RW in pos 0 and set step to 0
 		}
 		
+		//performe mean and square mean
 		for(int k=0; k<M; ++k)
 		{
 			avg[k][block]/=L;
@@ -93,6 +99,7 @@ int main(int argc, char* argv[])
 	vector<vector<double>> sum(M, vector<double> (nblock, 0.));
 	vector<vector<double>> su2(M, vector<double> (nblock, 0.));
 	vector<vector<double>> err(M, vector<double> (nblock, 0.));
+	// cumulative mean over blocks
 	for(int k=0; k<M; ++k) //step iteration
 	{
 		for(int block=0; block<nblock; ++block)

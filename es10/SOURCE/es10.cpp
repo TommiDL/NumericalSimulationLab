@@ -40,18 +40,19 @@ int main(int argc, char* argv[])
 
     pop.initialize();
  
-    if(rank == 0) pop.print_setup();
-
-
-
-    // cout << "Evolution started\n";
+    if(rank == 0) 
+    {
+        pop.print_setup();
+        string msg = (pop.get_migration())?"true":"false";
+        cout << "Migration " << msg << endl;
+    }// cout << "Evolution started\n";
 
     crom immigrant(coord.get_ncities(), 0);
 
     for(int j=0; j<pop.get_nsteps(); j++)
     {
 
-        if(j%pop.get_nmigr()==0)
+        if((j%pop.get_nmigr()==0) and pop.get_migration())
         // if(false)
         {
             crom bs = pop.get_best();

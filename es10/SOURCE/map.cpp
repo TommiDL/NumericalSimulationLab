@@ -266,9 +266,9 @@ void coordinates::save_coordinates(string filename)
     for(int k=0; k<_ncities; k++)
     {
         // out <<k;
-        out<<","<<this->_coord(k, 0);
+        out<<this->_coord(k, 0);
         for(int dim=1; dim<_ndim; dim++) 
-            out<<","<<this->_coord(k, dim);
+            out<<" "<<this->_coord(k, dim);
         out<<endl;
     }
 }

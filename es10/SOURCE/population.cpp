@@ -175,8 +175,17 @@ void population::initialize(string inputfile)
             read >> metr;
             this->sel.set_metric(metr);
         }
-        // else if(property == "PATH")
+        else if(property == "MIGRATION")
+        {
+            read>>migration;
+        }
+        // else if(property == "OUTPUT")
         // {
+        //     read>>output_dir;
+        //     output_dir="OUTPUT/"+output_dir+"/";
+        // }
+        // else if(property == "PATH")
+        // // {
         //     read >> file;
         //     out.open(setup_filename);
         //     if(!out.is_open())
@@ -594,7 +603,7 @@ void population::evolve()
         }
         else {
             _new_population[2*k]=_population[index1];
-            _new_population[2*k+1]=_population[index1];
+            _new_population[2*k+1]=_population[index2];
         }
 
         // mutate the new population 
@@ -708,17 +717,17 @@ void population::set_mutation_probability(
 
 void population::set_best_filename(string filename)
 {
-    best_filename="OUTPUT/"+filename;
+    best_filename=output_dir+filename;
 }
 
 void population::set_avg_filename(string filename)
 {
-    avg_filename="OUTPUT/"+filename;
+    avg_filename=output_dir+filename;
 }
 
 void population::set_setup_filename(string filename)
 {
-    setup_filename="OUTPUT/"+filename;
+    setup_filename=output_dir+filename;
 }
 
 void population::print_sol(int k, bool _new)
@@ -755,6 +764,11 @@ void population::print_setup()
     out << "Permutation probability = "<<this->mutation_prob[1]<<"\n";
     out << "Shift probability = "<<this->mutation_prob[2]<<"\n";
     out << "Subpermutation probability = "<<this->mutation_prob[3]<<"\n";
+
+    string msg = (this->get_migration())?"true":"false";
+    out << "Migration " << msg << endl;
+    if(this->migration)
+        out << "N migr "<< this->_Nmigr<<endl;
 
     out.close();
 

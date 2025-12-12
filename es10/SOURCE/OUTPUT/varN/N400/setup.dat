@@ -1,0 +1,9 @@
+Number of cities = 110
+Population size = 100
+Crossing probability = 0.8
+Inversion probability = 0.1
+Permutation probability = 0.1
+Shift probability = 0.1
+Subpermutation probability = 0.1
+Migration true
+N migr 400

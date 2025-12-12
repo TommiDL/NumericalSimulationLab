@@ -2,6 +2,7 @@
 #define __population__
 
 #include <armadillo>
+#include <string>
 #include <vector>
 #include "map.h"
 #include "operators.h"
@@ -81,7 +82,7 @@ class population
         void set_nsteps(int nsteps);
         int get_nsteps();
         int get_nmigr(){return _Nmigr;};
-
+        bool get_migration(){return migration;}
         /*save on file average of population's best half*/        
         void save_avg_cost();
         void save_best_half(string filename, int iteration);
@@ -107,7 +108,7 @@ class population
         crom _best;                     //store best sol of actual population
 
         vector<double> _pop_costs;      //store the cost of population's members
-        bool cost_evaluated=false, sorted=false;        
+        bool cost_evaluated=false, sorted=false, migration=true;        
         double _avg_cost=0.;
         
         Random _rnd;
@@ -173,9 +174,10 @@ class population
         bool check_solution(int i, bool _new);
         
         ofstream out;
-        string best_filename = "OUTPUT/best_sol.dat";  
-        string avg_filename  = "OUTPUT/avg_cost.dat";
-        string setup_filename = "OUTPUT/setup.dat";    
+        string output_dir="OUTPUT/";
+        string best_filename  = output_dir+"best_sol.dat";  
+        string avg_filename   = output_dir+"avg_cost.dat";
+        string setup_filename = output_dir+"setup.dat";    
 
 };
 

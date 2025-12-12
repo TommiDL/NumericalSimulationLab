@@ -582,7 +582,7 @@ void population::evolve()
         }
         else {
             _new_population[2*k]=_population[index1];
-            _new_population[2*k+1]=_population[index1];
+            _new_population[2*k+1]=_population[index2];
         }
 
         // mutate the new population 

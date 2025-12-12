@@ -35,8 +35,6 @@ class selection
         bool existing_coord=true; // to eventually deallocate pointer
 
         cost C=&coordinates::L2;  //pointer to function
-
-
 };
 
 class mutation

@@ -9,4 +9,5 @@
 introduzione_es/
 */.ipynb_checkpoints/*
 */.clangd
+*.gch
 

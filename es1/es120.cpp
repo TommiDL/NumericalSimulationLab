@@ -12,21 +12,20 @@ int main(int arc, char* argv [])
 	
 	int n=10000;
 	
-	vector<int> Nl={1, 2, 10, 100};
+	vector<int> Nl={1, 2, 10, 100}; 
 	
 	
-	//INSERIRE LA VARIANZA
 	
 	
 	for (int &N: Nl)
 	{
-		int L=n/N;
-		vector<double> SN_unf(L, 0);
-		vector<double> SN_exp(L, 0);
-		vector<double> SN_chl(L, 0);
+		// int L=n/N;
+		vector<double> SN_unf(n, 0);
+		vector<double> SN_exp(n, 0);
+		vector<double> SN_chl(n, 0);
 	
 
-		for (int k=0; k<L; ++k)
+		for (int k=0; k<n; ++k)
 		{
 			for(int i=0; i<N; ++i)
 			{

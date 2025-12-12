@@ -2,6 +2,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+
+# to soppress latex sintaxwarnings
+import warnings
+warnings.filterwarnings("ignore")
 ```
 
 ## Exercise 01.1
@@ -61,7 +65,6 @@ for el in (os.listdir('data')):
         continue
     if ('.csv'  not in el) or ('M' not in el):
         continue
-    print(el)
     M=int(el.split('M')[1].split('.')[0])
         
     df=pd.read_csv('data/'+el)
@@ -70,7 +73,6 @@ for el in (os.listdir('data')):
     ax.errorbar(
         df.throws, df.avg-0.5,
         yerr=df.err, 
-        #c='r', ecolor='b'
     )
 
     # expected value
@@ -83,12 +85,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-    data_M1000000.csv
-
-
 
     
-![png](Readme_files/Readme_3_1.png)
+![png](Readme_files/Readme_3_0.png)
     
 
 
@@ -103,7 +102,6 @@ for el in (os.listdir('data')):
         continue
     if ('.csv'  not in el) or ('M' not in el):
         continue
-    print(el)
     M=int(el.split('M')[1].split('.')[0])
         
     df=pd.read_csv('data/'+el)
@@ -112,7 +110,6 @@ for el in (os.listdir('data')):
     ax.errorbar(
         df.throws, df.avg-1/12,
         yerr=df.err, 
-        #c='r', ecolor='b'
     )
 
     # expected value
@@ -125,18 +122,15 @@ plt.tight_layout()
 plt.show()
 ```
 
-    var_estimation_M1000000.csv
-
-
 
     
-![png](Readme_files/Readme_5_1.png)
+![png](Readme_files/Readme_5_0.png)
     
 
 
 both the radius and the variance converge at a value whom distance from the actual value is less than one standard deviation
 
-# Chi 2
+# $\chi^2$
 
 
 ```python
@@ -148,7 +142,6 @@ import numpy as np
 
 ```python
 df=pd.read_csv('data/chi2.csv')
-
 ```
 
 
@@ -213,7 +206,22 @@ plt.show()
 
 ## Exercise 01.2
 
-da capire se implementato correttamente: io lancio il 'dado' $10^4$ volte ma poi il numero di elementi che genero dipende dal pedice della somma infatti per $S_100$ ho 100 elementi perche ne uso 100 dei $10^4$ per generare la singola somma
+I implemented a new class RandomMod using inheritance from the old Random class
+
+```C++
+
+class RandomMod: public Random
+{
+	public:
+		double exp(double lambda=1.);
+		
+		double CauchyLorentz(double mu=0., double gamma=1.);
+};
+
+```
+
+For every cumulative distribution $S_N$ i created $10^4$ values of the sums (with a number of throws of $n*10^4$) so that the distributions had always the same number of points to produce the histograms
+
 
 
 ```python
@@ -226,147 +234,56 @@ def gaussian(x, mu, sigma):
 
 ## Exponential distribution
 
+Below the implementation of the exponential generator
 
-```python
-N1=pd.read_csv('data/exp_N1.csv')
-N2=pd.read_csv('data/exp_N2.csv')
-N10=pd.read_csv('data/exp_N10.csv')
-N100=pd.read_csv('data/exp_N100.csv')
-
+```C++
+double RandomMod::exp(double lambda)
+{
+	double y=Rannyu();
+	return -(1/lambda)*log(1-y);
+}
 ```
 
 
 ```python
-N100
-```
+exp_N1=pd.read_csv('data/exp_N1.csv')
+exp_N2=pd.read_csv('data/exp_N2.csv')
+exp_N10=pd.read_csv('data/exp_N10.csv')
+exp_N100=pd.read_csv('data/exp_N100.csv')
 
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>data</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.991960</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>1.051740</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1.007820</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0.987448</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>0.960612</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>1.050500</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>1.009300</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>0.975320</td>
-    </tr>
-    <tr>
-      <th>98</th>
-      <td>0.896127</td>
-    </tr>
-    <tr>
-      <th>99</th>
-      <td>0.941228</td>
-    </tr>
-  </tbody>
-</table>
-<p>100 rows × 1 columns</p>
-</div>
-
-
-
-
-```python
-y, bins = np.histogram(N100.data)
-xc=[0.5*(bins[k]+bins[k+1]) for k in range(len(bins)-1)]
-
-
-plt.plot(xc, y)
-```
-
-
-
-
-    [<matplotlib.lines.Line2D at 0x7f2dbc2d1df0>]
-
-
-
-
-    
-![png](Readme_files/Readme_17_1.png)
-    
-
-
-
-```python
 fig, ax = plt.subplots(2, 2, figsize=(10,6))
 fig.suptitle('Exponential distribution sums')
 
 
-ax[0, 0].hist(N1.data, label='1', density=True, edgecolor='black', linewidth=1)
+ax[0, 0].hist(exp_N1.data,  bins=50, density=True, edgecolor='black', linewidth=1)
 ax[0, 0].set_title('$S_1$')
 
-ax[0, 1].hist(N2.data, label='2', density=True, edgecolor='black', linewidth=1)
+ax[0, 1].hist(exp_N2.data,  bins=50, density=True, edgecolor='black', linewidth=1)
 ax[0, 1].set_title('$S_2$')
 
-ax[1, 0].hist(N10.data, label='10', density=True, edgecolor='black', linewidth=1)
+ax[1, 0].hist(exp_N10.data, bins=50, density=True, edgecolor='black', linewidth=1)
 ax[1, 0].set_title('$S_{10}$')
 
-ax[1, 1].hist(N100.data, label='100', density=True, edgecolor='black', linewidth=1)
+ax[1, 1].hist(exp_N100.data,bins=50, density=True, edgecolor='black', linewidth=1)
 ax[1, 1].set_title('$S_{100}$')
 
-popt, pcov = curve_fit(gaussian, )
+y, bins = np.histogram(exp_N100.data, bins=50, density=True)
+xc=[0.5*(bins[k]+bins[k+1]) for k in range(len(bins)-1)]
+
+popt, pcov = curve_fit(gaussian, xc, y)
+ax[1, 1].plot(xc, gaussian(xc, popt[0], popt[1]), label=f'Gaussian fit \n$\mu$={"%.2f"%popt[0]} ,$\sigma$={"%.2f"%popt[1]}')
+ax[1, 1].legend()
 
 for k in [0,1]:
     for j  in [0,1]:
         ax[k,j].grid(True)
+plt.tight_layout()
 plt.show()
 ```
 
 
     
-![png](Readme_files/Readme_18_0.png)
+![png](Readme_files/Readme_15_0.png)
     
 
 
@@ -374,95 +291,114 @@ plt.show()
 
 
 ```python
-N1=pd.read_csv('data/unif_N1.csv')
-N2=pd.read_csv('data/unif_N2.csv')
-N10=pd.read_csv('data/unif_N10.csv')
-N100=pd.read_csv('data/unif_N100.csv')
+un_N1=pd.read_csv('data/unif_N1.csv')
+un_N2=pd.read_csv('data/unif_N2.csv')
+un_N10=pd.read_csv('data/unif_N10.csv')
+un_N100=pd.read_csv('data/unif_N100.csv')
 
-fig, ax = plt.subplots(2, 2, figsize=(10,10))
+fig, ax = plt.subplots(2, 2, figsize=(10,6))
 fig.suptitle('Uniform distribution sums')
 
 
-ax[0, 0].hist(N1.data, label='1', density=True, edgecolor='black', linewidth=1)
+ax[0, 0].hist(un_N1.data,  bins=50, density=True, edgecolor='black', linewidth=1)
 ax[0, 0].set_title('$S_1$')
 
-ax[0, 1].hist(N2.data, label='2', density=True, edgecolor='black', linewidth=1)
+ax[0, 1].hist(un_N2.data,  bins=50, density=True, edgecolor='black', linewidth=1)
 ax[0, 1].set_title('$S_2$')
 
-ax[1, 0].hist(N10.data, label='10', density=True, edgecolor='black', linewidth=1)
+ax[1, 0].hist(un_N10.data, bins=50, density=True, edgecolor='black', linewidth=1)
 ax[1, 0].set_title('$S_{10}$')
 
-ax[1, 1].hist(N100.data, label='100', density=True, edgecolor='black', linewidth=1)
+ax[1, 1].hist(un_N100.data, bins=50, density=True, edgecolor='black', linewidth=1)
 ax[1, 1].set_title('$S_{100}$')
 
-plt.legend()
+
+y, bins = np.histogram(un_N100.data, bins=50, density=True)
+xc=[0.5*(bins[k]+bins[k+1]) for k in range(len(bins)-1)]
+
+popt, pcov = curve_fit(gaussian, xc, y)
+ax[1, 1].plot(xc, gaussian(xc, popt[0], popt[1]), label=f'Gaussian fit \n$\mu$={"%.2f"%popt[0]} ,$\sigma$={"%.2f"%popt[1]}')
+ax[1, 1].legend()
+
+for k in [0,1]:
+    for j  in [0,1]:
+        ax[k,j].grid(True)
+
+plt.tight_layout()
 plt.show()
 ```
 
 
     
-![png](Readme_files/Readme_20_0.png)
+![png](Readme_files/Readme_17_0.png)
     
 
 
 ## Cauchy-Lorentz
 
+Below the implementation of the Chaucy-Lorentz generator
+```C++
+double RandomMod::CauchyLorentz(double mu, double gamma)
+{
+	double y=Rannyu();
+	return mu+gamma*(tan(M_PI*(y-0.5)));
+}
+```
+
 
 ```python
-N1=pd.read_csv('data/cauchy_N1.csv')
-N2=pd.read_csv('data/cauchy_N2.csv')
-N10=pd.read_csv('data/cauchy_N10.csv')
-N100=pd.read_csv('data/cauchy_N100.csv')
+cl_N1=pd.read_csv('data/cauchy_N1.csv')
+cl_N2=pd.read_csv('data/cauchy_N2.csv')
+cl_N10=pd.read_csv('data/cauchy_N10.csv')
+cl_N100=pd.read_csv('data/cauchy_N100.csv')
 
 
-fig, ax = plt.subplots(2, 2, figsize=(10,10))
+fig, ax = plt.subplots(2, 2, figsize=(10,6))
 fig.suptitle('Cauchy-Lorentz distribution sums')
 
 
-ax[0, 0].hist(N1.data,   label='1', bins=3000, density=True, edgecolor='black', linewidth=1)
-ax[0,0].set_xlim([-50, 50])
+ax[0, 0].hist(cl_N1.loc[(cl_N1.data<20) ].loc[ (cl_N1.data>-20)].data,   label='1', bins=50, density=True, edgecolor='black', linewidth=1)
+ax[0, 0].set_title('$S_1$')
 
-ax[0, 1].hist(N2.data,   label='2', bins=3000, density=True, edgecolor='black', linewidth=1)
-ax[0,1].set_xlim([-50, 50])
+ax[0, 1].hist(cl_N2.loc[cl_N2.data<20].loc[cl_N2.data>-20].data,   label='2', bins=50, density=True, edgecolor='black', linewidth=1)
+ax[0, 1].set_title('$S_2$')
 
-ax[1, 0].hist(N10.data,  label='10', bins=300,  density=True, edgecolor='black', linewidth=1)
-ax[1, 0].set_xlim([-20, 20])
+ax[1, 0].hist(cl_N10.loc[cl_N10.data<20].loc[cl_N10.data>-20].data,  label='10', bins=50,  density=True, edgecolor='black', linewidth=1)
+ax[1, 0].set_title('$S_{10}$')
 
-ax[1, 1].hist(N100.data, label='100', bins=30, density=True, edgecolor='black', linewidth=1)
+ax[1, 1].hist(cl_N100.loc[cl_N100.data<20].loc[cl_N100.data>-20].data, label='100', bins=50, density=True, edgecolor='black', linewidth=1)
+ax[1, 1].set_title('$S_{100}$')
 
-plt.legend()
+for k in [0,1]:
+    for j  in [0,1]:
+        ax[k,j].grid(True)
+
+plt.tight_layout()
 plt.show()
 ```
 
 
     
-![png](Readme_files/Readme_22_0.png)
-    
-
-
-
-```python
-plt.hist(N1.data, bins=3000, label='1', density=True, linewidth=1.2, edgecolor='black')
-plt.xlim([-20., 20])
-
-```
-
-
-
-
-    (-20.0, 20.0)
-
-
-
-
-    
-![png](Readme_files/Readme_23_1.png)
+![png](Readme_files/Readme_19_0.png)
     
 
 
 dire qualcosa sul fatto che cauchy ha media e varianza non def quindi no clt|
 
 ### Exercise 01.3
+
+To simulate the needle on the plane i generated a point following a uniform distribution in [0, d). 
+
+In fact using parallel lines at constant distance d divide the plane in periodics strips so it's enough to generate the first point inside the strip [0, d).
+
+After i generated (using again a uniform distribution) 2 values `x_dir` and `y_dir` $\in [-1,1)$ and used the projector $\frac{x\_dir}{\sqrt{(x\_dir^2 + y\_dir^2 )}}$ to compute the projection $x_1$ of the needle along the x-axis. 
+
+If $x_1>d$ or $x_1<0$ then the needle have an intersection with the lines.
+
+I used 100 blocks with 100 throws per block to estimate the intersection-success rate (for every block) and produce one $\pi$ estimation per block.
+
+After i maded a progressive average and the variance calculation on the blocks values.
+
 
 
 ```python
@@ -475,111 +411,6 @@ import numpy as np
 ```python
 bf = pd.read_csv('data/prob_buffon.csv')
 
-bf
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>throws</th>
-      <th>avg</th>
-      <th>err</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0</td>
-      <td>2.96296</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>100</td>
-      <td>3.08148</td>
-      <td>0.118519</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>200</td>
-      <td>3.00670</td>
-      <td>0.101362</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>300</td>
-      <td>2.95678</td>
-      <td>0.087345</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>400</td>
-      <td>3.07654</td>
-      <td>0.137546</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>9500</td>
-      <td>3.15988</td>
-      <td>0.038836</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>9600</td>
-      <td>3.15785</td>
-      <td>0.038487</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>9700</td>
-      <td>3.15113</td>
-      <td>0.038679</td>
-    </tr>
-    <tr>
-      <th>98</th>
-      <td>9800</td>
-      <td>3.15369</td>
-      <td>0.038372</td>
-    </tr>
-    <tr>
-      <th>99</th>
-      <td>9900</td>
-      <td>3.15353</td>
-      <td>0.037986</td>
-    </tr>
-  </tbody>
-</table>
-<p>100 rows × 3 columns</p>
-</div>
-
-
-
-
-```python
 plt.figure(figsize=(10,3))
 plt.title('$\pi$ estimation')
 plt.errorbar(bf.throws, bf.avg, yerr=bf.err)
@@ -591,23 +422,8 @@ plt.xlabel('throws')
 plt.show()
 ```
 
-    <>:2: SyntaxWarning: invalid escape sequence '\p'
-    <>:6: SyntaxWarning: invalid escape sequence '\p'
-    <>:2: SyntaxWarning: invalid escape sequence '\p'
-    <>:6: SyntaxWarning: invalid escape sequence '\p'
-    /tmp/ipykernel_4495/2531555135.py:2: SyntaxWarning: invalid escape sequence '\p'
-      plt.title('$\pi$ estimation')
-    /tmp/ipykernel_4495/2531555135.py:6: SyntaxWarning: invalid escape sequence '\p'
-      plt.ylabel('$\pi$')
-
-
 
     
-![png](Readme_files/Readme_28_1.png)
+![png](Readme_files/Readme_23_0.png)
     
 
-
-
-```python
-
-```

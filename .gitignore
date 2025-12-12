@@ -3,8 +3,8 @@
 *.txt
 *.xyz
 ._*
-*.pdf
+*/*.pdf
 #*.dat
-*.o
+*/*.o
 introduzione_es/
 */.ipynb_checkpoints/*

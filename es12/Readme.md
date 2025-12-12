@@ -12,10 +12,6 @@ np.random.seed(seed) # fix random seed
 tf.random.set_seed(seed)
 ```
 
-    2025-11-27 09:54:12.185653: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
-    To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-
-
 ### Load and process the data
 
 
@@ -71,6 +67,9 @@ def load_data():
 
 ```python
 (X_train, Y_train), (X_test, Y_test)=load_data()
+img_rows, img_cols = 28, 28 # number of pixels 
+num_classes = 10 # 10 digits
+
 
 ```
 
@@ -157,8 +156,7 @@ sgd_hist = model_sgd.fit(X_train, Y_train,
           validation_data=(X_test, Y_test))
 ```
 
-    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/keras/src/layers/core/dense.py:93: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
-      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+    2025-11-27 11:54:35.974219: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
 
 
 
@@ -181,8 +179,7 @@ adam_hist=model_adam.fit(X_train, Y_train,
     ADAM
 
 
-    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/keras/src/layers/core/dense.py:93: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
-      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+    2025-11-27 11:56:03.602550: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
 
 
 ## RMSprop
@@ -203,8 +200,7 @@ rms_hist=model_rms.fit(X_train, Y_train,
     RMSprop
 
 
-    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/keras/src/layers/core/dense.py:93: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
-      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+    2025-11-27 11:59:51.025386: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
 
 
 # ADAMAX
@@ -225,8 +221,7 @@ admx_hist=model_admx.fit(X_train, Y_train,
     adamax
 
 
-    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/keras/src/layers/core/dense.py:93: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
-      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+    2025-11-27 12:02:52.617763: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
 
 
 
@@ -267,8 +262,8 @@ ax[0].plot(rms_hist.history['val_acc'], label='rms val acc', ls='--',c='C1')
 ax[0].plot(admx_hist.history['acc'], label='adamax acc',c='C2')
 ax[0].plot(admx_hist.history['val_acc'], label='adamax val acc', ls='--',c='C2')
 
-ax[0].plot(sgd_hist.history['acc'], label='rms acc',c='C3')
-ax[0].plot(sgd_hist.history['val_acc'], label='rms val acc', ls='--',c='C3')
+ax[0].plot(sgd_hist.history['acc'], label='sgd acc',c='C3')
+ax[0].plot(sgd_hist.history['val_acc'], label='sgd val acc', ls='--',c='C3')
 
 ax[0].set_xlabel('epoch')
 ax[0].set_ylabel('model accuracy')
@@ -286,8 +281,8 @@ ax[1].plot(rms_hist.history['val_loss'], label='rms val loss', marker='*', ls='-
 ax[1].plot(admx_hist.history['loss'], label='adamax loss',c='C2')
 ax[1].plot(admx_hist.history['val_loss'], label='adamax val loss', marker='*', ls='--',c='C2')
 
-ax[1].plot(sgd_hist.history['loss'], label='rms loss',c='C3')
-ax[1].plot(sgd_hist.history['val_loss'], label='rms val loss', marker='*', ls='--',c='C3')
+ax[1].plot(sgd_hist.history['loss'], label='sgd loss',c='C3')
+ax[1].plot(sgd_hist.history['val_loss'], label='sgd val loss', marker='*', ls='--',c='C3')
 
 ax[1].set_ylabel('model loss')
 ax[1].set_xlabel('epoch')
@@ -298,25 +293,25 @@ plt.show()
 ```
 
     SGD
-    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step - acc: 0.9715 - loss: 0.0884
+    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 1ms/step - acc: 0.9723 - loss: 0.0899
     
-    	Test loss: 0.07467494159936905
+    	Test loss: 0.0772780328989029
     	Test accuracy: 0.975600004196167
     Adam
-    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step - acc: 0.9787 - loss: 0.1592
+    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 1ms/step - acc: 0.9766 - loss: 0.1787
     
-    	Test loss: 0.1257559061050415
-    	Test accuracy: 0.9815000295639038
+    	Test loss: 0.13755884766578674
+    	Test accuracy: 0.9810000061988831
     RMS
-    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step - acc: 0.9737 - loss: 0.2797
+    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 1ms/step - acc: 0.9744 - loss: 0.2654
     
-    	Test loss: 0.22997719049453735
-    	Test accuracy: 0.9772999882698059
+    	Test loss: 0.2172429859638214
+    	Test accuracy: 0.9779000282287598
     Adamax
-    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step - acc: 0.9799 - loss: 0.0747
+    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 1ms/step - acc: 0.9820 - loss: 0.0701
     
-    	Test loss: 0.06233464181423187
-    	Test accuracy: 0.9833999872207642
+    	Test loss: 0.05962233990430832
+    	Test accuracy: 0.9847000241279602
 
 
 
@@ -487,7 +482,7 @@ cnn_history=model_CNN.fit(X_train, Y_train,
           batch_size=batch_size,
           shuffle=True,
           epochs=epochs,
-          verbose=1,
+          verbose=0,
           validation_data=(X_test, Y_test))
 
 # evaliate model
@@ -688,6 +683,8 @@ model_CNN.save('CNN.keras')
 
 ### Exercise 12.3
 
+AGGIUNGERE LE DISTRIBUZIONI SU I NUMERI SCRITTI DA ME
+
 
 ```python
 from PIL import Image
@@ -842,7 +839,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_38_3.png)
+![png](Readme_files/Readme_39_3.png)
     
 
 
@@ -957,9 +954,11 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_39_3.png)
+![png](Readme_files/Readme_40_3.png)
     
 
+
+STATEMENT: NON LEGGE IMMAGINI RUOTATE E DECENTRATE
 
 
 ```python
@@ -1012,6 +1011,6 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_41_1.png)
+![png](Readme_files/Readme_43_1.png)
     
 

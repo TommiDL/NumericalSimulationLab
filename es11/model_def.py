@@ -149,6 +149,46 @@ def NN(
     return model
 
 
+def NN2(
+    n_layer:int=2,
+    neurons:list=[3, 2],
+    activations=['relu'],
+    kernel_initializer='glorot_uniform'
+):
+    """
+    Generate a Deep Neural network specifing the architecture:
+    Parameters:
+        - n_layer            [int]      : number of hidden layers
+        - neurons            [list(int)]: number of neurons of the corresponding index layer
+        - activations        [list(str)]: list of activation functions 
+            (if less than the layers the last function will be apllied to the remaining layers)
+        - kernel_initializer [str]      : Initializer for the `kernel` weights matrix.
+    Return:
+        model [Keras.Sequential]
+    """
+
+    if (len(neurons)!=n_layer):
+        raise ValueError('ERROR: List of neurons incompatible with number of layers')
+    model = tf.keras.Sequential()
+    model.add(Input(shape=(2,))) #input layer
+
+    activation_index=0
+    
+    for layer in range(n_layer):
+        model.add(
+            Dense(
+                neurons[layer], 
+                activations[activation_index],
+                kernel_initializer=kernel_initializer # to confront architectures
+            )
+        )
+
+        if activation_index+1<len(activations):
+            activation_index+=1
+    model.add(Dense(1, activation='linear'))
+
+    return model
+
 #@click.method()
 def test_arch(
     nlayers:int, x_train, y_train, x_valid, y_valid, 
@@ -250,3 +290,5 @@ def test_arch(
         npar.append(md.count_params())
  
     return  best_vloss, best_index, combinations, loss, val_loss, npar, x_predicted, y_predicted
+
+

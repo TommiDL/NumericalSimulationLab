@@ -47,3 +47,22 @@ def generate_poly_data(pol, seed=0):
 
 def pol(x):
   return 4-3*x - 2*x**2 + 3*x**3
+
+def f(x, y):
+    return np.sin(x**2 + y**2)
+
+def gen_sinxy(nval=10000, ntrain=10000, sigma:float=0.01):
+    x_valid = np.random.uniform(-3./2., 3./2., nval)
+    y_valid = np.random.uniform(-3./2., 3./2., nval)
+    
+    x_train = np.random.uniform(-3./2., 3./2., ntrain)
+    y_train = np.random.uniform(-3./2., 3./2., ntrain)
+    
+    
+    z_target = f(x_valid, y_valid)
+        
+    z_valid = z_target + np.random.uniform(0, sigma, nval)
+    z_train = f(x_train, y_train) + np.random.uniform(0, sigma, ntrain)
+
+    return (x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target))
+

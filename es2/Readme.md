@@ -6,10 +6,6 @@ import matplotlib.pyplot as plt
 
 ## Exercise 02.1
 
-aggiungere a lato del plot le funzioni dell importance sampling paragonate col coseno e plot degli errori
-
-
-
 
 ```python
 integral=pd.read_csv('data/cosinteg_M1000000.csv')
@@ -18,29 +14,54 @@ df_is=pd.read_csv('data/cosinteg_M1000000_is.csv')
 ```
 
 
-It's clearly visible that using the first order taylor expansion of the cos function the convergence is faster with a minor variance
+It's clearly visible that using the first order taylor expansion in $x=1$ of the cos function the convergence is faster with a minor variance
 
-due parole in piu su come ho scelto dove centrare taylor
+
 
 
 ```python
-plt.figure(figsize=(10,5))
-plt.errorbar(integral.index, integral.avg, color='r', ecolor='orange', yerr=integral.err, label='p=1')
-plt.errorbar(df_is.index, df_is.avg, yerr=df_is.err, label='p=2(1-x)', color='b', ecolor='c')
-plt.hlines(1, 0, df_is.index[-1], linestyles='--', colors='r')
-plt.legend()
-plt.ylabel(r'<$\int_0^1 \frac{\pi}{2} cos(\pi x/2 )dx$>')
-plt.xlabel('# blocks')
+#fig, ax = plt.subplots(1, 2, width_ratios=[2, 1],figsize=(10,5))
+fig = plt.figure(figsize=(10,10))
+ax0 = plt.subplot(2,1,1)
+ax0.errorbar(integral.index, integral.avg, color='r', ecolor='orange', yerr=integral.err, label='uniform p(x)=1')
+ax0.errorbar(df_is.index, df_is.avg, yerr=df_is.err, label='p(x)=2(1-x)', color='b', ecolor='c')
+ax0.hlines(1, 0, df_is.index[-1], linestyles='--', colors='r')
+ax0.legend()
+ax0.set_ylabel(r'<$\int_0^1 \frac{\pi}{2} cos(\pi x/2 )dx$>')
+ax0.set_xlabel('# blocks')
+ax0.grid(True)
 
+ax1 = plt.subplot(2,2,3)
+ax1.set_title('Sampling distributions')
 
-plt.grid(True)
+x = np.linspace(0,1,100)
+
+ax1.plot(x, 0.5*np.pi*np.cos(np.pi*x*0.5),
+    label=r'$\frac{\pi}{2} cos(\pi x/2 )dx$'
+    )
+ax1.plot(x, 2*(1-x), label='p(x)=2(1-x)')
+ax1.hlines(1, 0, 1, color='C2', label='uniform p(x)=1')
+ax1.grid()
+ax1.set_xlabel('x')
+ax1.set_ylabel('y')
+ax1.legend()
+
+ax2 = plt.subplot(2,2,4)
+ax2.set_title('Errors on mean')
+ax2.plot(integral.index, integral['err'], label='uniform')
+ax2.plot(df_is.index, df_is['err'], label = 'p(x)=2(1-x)')
+ax2.set_xlabel('# blocks')
+ax2.set_ylabel('Error')
+ax2.legend()
+ax2.grid()
+plt.tight_layout()
 plt.show()
 
 ```
 
 
     
-![png](Readme_files/Readme_5_0.png)
+![png](Readme_files/Readme_4_0.png)
     
 
 
@@ -48,7 +69,7 @@ plt.show()
 
 
 ## Code implementation
-I implemented 2 classes Random Walk (lattice and continuous) 
+I implemented 2 classes [Random Walk](random_walk.h) (lattice and continuous) 
 
 ```C++
 class RW_lattice
@@ -200,126 +221,24 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_9_0.png)
+![png](Readme_files/Readme_8_0.png)
     
 
 
 To compute the mean value of the explored distance of the Random Walk, $10^4$ relization of the RW were computed and distributed along 100 blocks on which it was calculated the progressive average at every step storing it as a matrix step x block
 
-```C++
-
-	//number of realizations
-	int N=10000;
-	
-	//number of steps
-	int M=100;
-	
-	//data block dimension
-	int nblock=100;
-	int L=N/nblock;
-	
-	
-	out<<"#rw,step,x,y,z"<<endl;
-	RW_lattice rw(1.);
-	
-	//2d vectors of shape (Nblocks, step)
-	vector<vector<double>> avg(M, vector<double> (nblock, 0.));
-	vector<vector<double>> av2(M, vector<double> (nblock, 0.));
-	
-	
-	
-	for(int block=0; block<nblock; ++block)
-	{
-		for(int l=0; l<L; ++l) // for each block make L RWs
-		{	
-				
-			int run=L*block+l;
-			
-			/*******   new RW   *******/
-
-			vector<double> point = rw.get_pos();
-			// save initial step
-			out <<run<<","<<rw.get_nstep()<<","
-				<<point[0]<<","
-				<<point[1]<<","
-				<<point[2]<<endl;
-			
-
-			for (int k=0; k<M; ++k) //for on steps
-			{
-				rw.make_step();
-				
-				// save step
-				point=rw.get_pos();
-				out<<run<<","<<rw.get_nstep()
-					<<","<<point[0]
-					<<","<<point[1]
-					<<","<<point[2]<<endl;
-				
-				//for each step update 
-				// the average on nblock walks
-				avg[k][block]+=sqrt(
-					 point[0]*point[0]
-					+point[1]*point[1]
-					+point[2]*point[2]
-				);
-			}
-			// reset the RW in pos 0 and set step to 0
-			rw.reset_rw(); 
-		}
-		
-		//performe mean and square mean
-		for(int k=0; k<M; ++k)
-		{
-			avg[k][block]/=L;
-			av2[k][block]=avg[k][block]*avg[k][block];
-		}
-	}	
-	
-	//save the RWs
-	out.close();
-
-
-	//init file
-	stat_out<<"N,block,rN,err"<<endl;
-	
-	vector<vector<double>> sum(M, vector<double> (nblock, 0.));
-	vector<vector<double>> su2(M, vector<double> (nblock, 0.));
-	vector<vector<double>> err(M, vector<double> (nblock, 0.));
-	// cumulative mean over blocks
-	for(int k=0; k<M; ++k) //step iteration
-	{
-		for(int block=0; block<nblock; ++block)
-		{
-			for(int j=0; j<=block; ++j)
-			{
-				sum[k][block]+=avg[k][j];
-				su2[k][block]+=av2[k][j];
-			}
-			sum[k][block]/=(block+1);
-			su2[k][block]/=(block+1);
-			err[k][block]=error(sum[k], su2[k], block);
-		
-			stat_out<<k<<","<<block<<","
-				<<sum[k][block]<<","
-				<<err[k][block]<<endl;		
-		}
-	}
-	stat_out.close();
-	
-```
 
 ## Data Visualization
 ### Lattice RW
 
 
 ```python
-dfrn=pd.read_csv('data/RW_rn.csv')
+dfrn_lat=pd.read_csv('data/RW_rn.csv')
 
 fig, ax = plt.subplots(1, 4, figsize=(15, 2.5))
 fig.suptitle('Block average of r on $10^4$ walks at a certain step')
-for N in dfrn.N.unique()[::25]:
-    dfn=dfrn.loc[dfrn.N==N]
+for N in dfrn_lat.N.unique()[::25]:
+    dfn=dfrn_lat.loc[dfrn_lat.N==N]
     ax[N//25].set_title(f'step {N}')
     ax[N//25].errorbar(100*dfn.block, dfn.rN, yerr=dfn.err)
     ax[N//25].set_xlabel('# of walks')
@@ -331,7 +250,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_12_0.png)
+![png](Readme_files/Readme_11_0.png)
     
 
 
@@ -347,7 +266,7 @@ def diffuse(N, k:float):
 
 
 ```python
-diff_m=dfrn.loc[dfrn.block==99].reset_index(drop=True) # last block values
+diff_m=dfrn_lat.loc[dfrn_lat.block==99].reset_index(drop=True) # last block values
 
 # fit parameters
 popt, pcov = curve_fit(diffuse, diff_m.N, diff_m.rN)
@@ -375,7 +294,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_15_0.png)
+![png](Readme_files/Readme_14_0.png)
     
 
 
@@ -400,7 +319,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_17_0.png)
+![png](Readme_files/Readme_16_0.png)
     
 
 
@@ -435,7 +354,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_18_0.png)
+![png](Readme_files/Readme_17_0.png)
     
 
 
@@ -454,7 +373,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_19_0.png)
+![png](Readme_files/Readme_18_0.png)
     
 
 

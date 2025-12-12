@@ -235,7 +235,7 @@ To compute the mean value of the explored distance of the Random Walk, $10^4$ re
 ```python
 dfrn_lat=pd.read_csv('data/RW_rn.csv')
 
-fig, ax = plt.subplots(1, 4, figsize=(15, 2.5))
+fig, ax = plt.subplots(1, 4, figsize=(18, 4))
 fig.suptitle('Block average of r on $10^4$ walks at a certain step')
 for N in dfrn_lat.N.unique()[::25]:
     dfn=dfrn_lat.loc[dfrn_lat.N==N]
@@ -304,7 +304,7 @@ plt.show()
 ```python
 dfrn=pd.read_csv('data/RW_continuous_rn.csv')
 
-fig, ax = plt.subplots(1, 4, figsize=(15, 2.5))
+fig, ax = plt.subplots(1, 4, figsize=(18, 4))
 fig.suptitle('Block average of r on $10^4$ walks at a certain step for continuous case')
 for N in dfrn.N.unique()[::25]:
     dfn=dfrn.loc[dfrn.N==N]

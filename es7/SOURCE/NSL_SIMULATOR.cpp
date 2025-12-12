@@ -25,20 +25,22 @@ int main (int argc, char *argv[]){
   SYS.block_reset(0);
   int nb=SYS.get_nbl();
 
+  
+  SYS.print_details();
+  SYS.equilibration_steps();
+  cout << "Symulation started"<<endl;
 
-  cout<<"\t["<<setw(20)<<"]";
-    
   for(int i=0; i < SYS.get_nbl(); i++){ //loop over blocks
-
     for(int j=0; j < SYS.get_nsteps(); j++){ //loop over steps in a block
       SYS.step();
       SYS.measure();
       if(j%50 == 0){
-        SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"! 
+        //SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"! 
         nconf++;
       }
     }
     SYS.averages(i+1);
+    
     SYS.block_reset(i+1);
 
     progress(i, nb);

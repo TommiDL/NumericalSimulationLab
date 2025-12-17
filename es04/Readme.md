@@ -67,7 +67,17 @@ for(int k=0; k<_n_bins_v; ++k)
 
 ```
 
-#### Load data
+## Data visualization
+### Load data
+Below are reported the measure of the velocity distribution for a MD simulation computed with the conditions:
+- TEMPERATURE= 2
+- NPART= 108
+- SIDE=      12.9266     12.9266     12.9266
+- R_CUT= 5
+- DELTA= 0.001
+- NBLOCKS= 200
+- NSTEPS= 2000
+
 
 
 ```python
@@ -83,7 +93,7 @@ T=pd.read_csv('OUTPUT/distrib/MB/temperature.dat', skiprows=1, delimiter=r'\s+',
 
 ```
 
-#### Fit temperature from POFV
+### Fit temperature from POFV
 
 
 ```python
@@ -103,7 +113,12 @@ for k in df_mb.block.unique():
 mb_fit=pd.DataFrame(mb_fit)
 ```
 
-#### Plot distribution at different blocks
+### Plot distribution at different blocks
+In the graph below are shown both the block averages (on the left) and the progressive averages (on the right) of the velocity distribution for some block values.
+
+The progressive averages converge to an actual Maxwell Boltzmann distribution.
+
+
 
 
 ```python
@@ -162,6 +177,8 @@ plt.show()
     
 
 
+In the following image are plotted the values obtained from the fit for the actual and progressive averages of $p(v)$ compared to the measured values of the simulation
+
 
 ```python
 plt.figure(figsize=(10, 4))
@@ -178,30 +195,23 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_9_0.png)
+![png](Readme_files/Readme_10_0.png)
     
 
 
 ### Properties 
+Below are reported the measures obtained starting from a Maxwell-Boltzmann distribution
 
 
 ```python
 K=pd.read_csv('OUTPUT/distrib/MB/kinetic_energy.dat', delimiter=r"\s+")
-```
-
-
-```python
 U=pd.read_csv('OUTPUT/distrib/MB/potential_energy.dat', delimiter=r"\s+")
-```
-
-
-```python
 P=pd.read_csv('OUTPUT/distrib/MB/pressure.dat', delimiter=r"\s+")
 ```
 
 
 ```python
-fig, ax = plt.subplots(4,2,  figsize=(10, 12))
+fig, ax = plt.subplots(4,2,  figsize=(15, 12))
 
 ax[0, 0].set_title('Temperature per block')
 # block averages
@@ -260,7 +270,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_14_0.png)
+![png](Readme_files/Readme_13_0.png)
     
 
 
@@ -272,8 +282,6 @@ histos=pd.DataFrame(columns=['vel']+[f'block_{k}' for k in range(df_mb['block'].
 histos['vel']=df_mb.loc[df_mb['block']==0]['#vel'].values
 for k in range(df_mb['block'].max()):
     histos[f'block_{k}']=df_mb.loc[df_mb.block==k]['block_avg'].values 
-    
-
 ```
 
 
@@ -289,14 +297,55 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_17_0.png)
+![png](Readme_files/Readme_16_0.png)
     
 
 
-## Esercizio 04.2
+# Exercise 04.2
 
-mettere i criteri per cui avevo messo blocchi strapiccoli (far vedere l'evoluzione dalla delta
-)
+##  Delta distribution implementation
+
+
+```C++
+//initial velocity
+double velt=sqrt(3*_temp);
+for (int i=0; i<_npart; i++){
+    double rdir  = _rnd.Rannyu();       //sample direction
+    double rvers = _rnd.Rannyu()-0.5;   //sample verse 
+    int sign= ((rvers<0)? -1: 1);
+    
+    if(rdir<1/3.)
+    {
+        vx(i) = sign*velt;
+        vy(i) = 0.;
+        vz(i) = 0.;
+    }else if(rdir<2/3.)
+    {
+        vx(i) = 0.;
+        vy(i) = sign*velt;
+        vz(i) = 0.;      
+    } else
+    {
+        vx(i) = 0.;
+        vy(i) = 0.;
+        vz(i) = sign*velt;
+    }
+}
+
+// initialize particles velocity
+for (int i=0; i<_npart; i++){
+    _particle(i).setvelocity(0, vx(i));
+    _particle(i).setvelocity(1, vy(i));
+    _particle(i).setvelocity(2, vz(i));
+}    
+```
+
+## Data visualization
+To visualize the evolution from the delta distribution the blocks were filled with a low number of steps(20 steps per block).
+
+If the number of steps was higher the evolution of the system would drift the $p(v)$ away from the delta distribution before the end of the first block
+
+
 
 
 ```python
@@ -312,133 +361,18 @@ df=pd.read_csv('OUTPUT/distrib/delta/pofv.dat', header=None, names=['#vel', 'blo
 
 df['block']=0
 df['block']=df.index//30
-   
+T_d=pd.read_csv(
+    'OUTPUT/distrib/delta/temperature.dat', delimiter=r"\s+")
+
 ```
 
     <>:1: SyntaxWarning: invalid escape sequence '\s'
     <>:1: SyntaxWarning: invalid escape sequence '\s'
-    /tmp/ipykernel_8004/677895036.py:1: SyntaxWarning: invalid escape sequence '\s'
+    /tmp/ipykernel_69161/2428484204.py:1: SyntaxWarning: invalid escape sequence '\s'
       df=pd.read_csv('OUTPUT/distrib/delta/pofv.dat', header=None, names=['#vel', 'block_avg', 'prog_avg', 'err'], skiprows=1, sep="\s+")
 
 
-
-```python
-T_d=pd.read_csv(
-    'OUTPUT/distrib/delta/temperature.dat', delimiter=r"\s+")
-T_d
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>#BLOCK:</th>
-      <th>ACTUAL_T:</th>
-      <th>T_AVE:</th>
-      <th>ERROR:</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>2.00002</td>
-      <td>2.00002</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>2.00012</td>
-      <td>2.00007</td>
-      <td>0.000036</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>2.00032</td>
-      <td>2.00015</td>
-      <td>0.000074</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>2.00064</td>
-      <td>2.00027</td>
-      <td>0.000119</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>2.00108</td>
-      <td>2.00044</td>
-      <td>0.000173</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>19995</th>
-      <td>19996</td>
-      <td>2.23006</td>
-      <td>2.19227</td>
-      <td>0.000220</td>
-    </tr>
-    <tr>
-      <th>19996</th>
-      <td>19997</td>
-      <td>2.23220</td>
-      <td>2.19228</td>
-      <td>0.000220</td>
-    </tr>
-    <tr>
-      <th>19997</th>
-      <td>19998</td>
-      <td>2.23856</td>
-      <td>2.19228</td>
-      <td>0.000220</td>
-    </tr>
-    <tr>
-      <th>19998</th>
-      <td>19999</td>
-      <td>2.24900</td>
-      <td>2.19228</td>
-      <td>0.000220</td>
-    </tr>
-    <tr>
-      <th>19999</th>
-      <td>20000</td>
-      <td>2.25877</td>
-      <td>2.19228</td>
-      <td>0.000220</td>
-    </tr>
-  </tbody>
-</table>
-<p>20000 rows × 4 columns</p>
-</div>
-
-
+## Maxwell-boltxmann fit
 
 
 ```python
@@ -479,6 +413,10 @@ for k in df.block.unique():
 
 delta_fit=pd.DataFrame(delta_fit)
 ```
+
+### Plot distribution at different blocks
+
+Below are reported the actual and progressive block average of the velocity distribution for some blocks
 
 
 ```python
@@ -539,6 +477,10 @@ plt.show()
     
 
 
+With the evolution of the system return to a Maxwell-Boltzmann distribution.
+
+In the following image are reported the values of temperature obtained by a Maxwell-Boltzmann fit on the velocity distribution compared with the measured values. Initially the values are significally different but as the distribution converge to MB they become more similar.
+
 
 ```python
 plt.figure(figsize=(10, 4))
@@ -552,7 +494,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_26_0.png)
+![png](Readme_files/Readme_27_0.png)
     
 
 
@@ -561,15 +503,7 @@ plt.show()
 
 ```python
 K_d=pd.read_csv('OUTPUT/distrib/delta/kinetic_energy.dat', delimiter=r"\s+")
-```
-
-
-```python
 U_d=pd.read_csv('OUTPUT/distrib/delta/potential_energy.dat', delimiter=r"\s+")
-```
-
-
-```python
 P_d=pd.read_csv('OUTPUT/distrib/delta/pressure.dat', delimiter=r"\s+")
 ```
 
@@ -638,56 +572,12 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_31_0.png)
+![png](Readme_files/Readme_30_0.png)
     
 
 
-capire o eliminare, mi sa eliminare
-
-
-```python
-plt.title('Temperature values distribution')
-plt.hist(T_d['ACTUAL_T:'], bins=5000)
-plt.vlines(T_d['T_AVE:'][len(T_d)-1], ymin=0, ymax=60,  color='r', label=r'mean value $\mu$')
-plt.vlines(
-    T_d['T_AVE:'][len(T_d)-1]+np.sqrt(20000)*T_d['ERROR:'][len(T_d)-1],
-    ymin=0, ymax=60, ls='--',  color='r', label=r'$\mu+\sigma$'
-)
-
-plt.vlines(
-    T_d['T_AVE:'][len(T_d)-1]-np.sqrt(20000)*T_d['ERROR:'][len(T_d)-1],
-    ymin=0, ymax=60, ls='--',  color='r', label=r'$\mu-\sigma$'
-)
-
-plt.fill_betweenx(
-    [k for k in range(60)], T_d['T_AVE:'][len(T_d)-1], 
-    T_d['T_AVE:'][len(T_d)-1]+np.sqrt(20000)*T_d['ERROR:'][len(T_d)-1], 
-    color='r', alpha=0.15
-)
-plt.fill_betweenx(
-    [k for k in range(60)], T_d['T_AVE:'][len(T_d)-1], 
-    T_d['T_AVE:'][len(T_d)-1]-np.sqrt(20000)*T_d['ERROR:'][len(T_d)-1], 
-    color='r', alpha=0.15
-)
-
-plt.xlabel('T')
-
-plt.xlim([2.0, 2.4])
-plt.legend()
-#plt.grid()
-plt.show()
-```
-
-
-    
-![png](Readme_files/Readme_33_0.png)
-    
-
-
-
-```python
-
-```
+### Histograms Heatmap 
+The image below show the convergence of the distribution from a delta to a MB along the blocks of the MD process.  
 
 
 ```python
@@ -716,28 +606,27 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_36_0.png)
+![png](Readme_files/Readme_33_0.png)
     
 
 
+## Exercise 04.3 [back to the future]
 
-```python
+I runned the simulation backwards starting from the last configuration of a MD simulation with a delta initial distribution of velocities. I used one throw per block to visualize the delta distribution.
 
-```
-
-
-```python
-
-```
+The final block of the backward simulation returned to a delta distribution of velocities.
 
 
-```python
+The delta-starting simulation was computed with the following parameters"
 
-```
-
-## Esercizio 04.3 [back to the future]
-
-da sistemare bene
+- TEMPERATURE= 2
+- NPART= 108
+- SIDE=      12.9266     12.9266     12.9266
+- R_CUT= 5
+- DELTA= 0.001
+- NBLOCKS= 2000
+- NSTEPS= 1
+- INITIAL DISTRIBUTION TYPE= Delta
 
 
 ```python
@@ -750,11 +639,6 @@ df_btf['block']=df_btf.index//30
 # Temperature data
 T_btf=pd.read_csv('OUTPUT/bckwd/200bl/bw/temperature.dat', skiprows=1, delimiter=r'\s+',names=['block','actual_T','T_ave','error'])
 
-
-```
-
-
-```python
 
 ```
 
@@ -784,401 +668,100 @@ for k in range(12):
 plt.show()
 ```
 
-    /tmp/ipykernel_276583/2678452637.py:20: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+    /tmp/ipykernel_4889/2678452637.py:20: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
       ax[k//2,  k%2].legend(loc='lower center')
 
 
 
     
-![png](Readme_files/Readme_43_1.png)
+![png](Readme_files/Readme_36_1.png)
     
 
+
+Below a picture of the last block of the simulation
 
 
 ```python
 last=df_btf.loc[df_btf['block']==df_btf['block'].max()].reset_index(drop=True)
-
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>#vel</th>
-      <th>block_avg</th>
-      <th>prog_av</th>
-      <th>err</th>
-      <th>block</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.094281</td>
-      <td>0.000000</td>
-      <td>0.001514</td>
-      <td>0.000077</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0.282843</td>
-      <td>0.000000</td>
-      <td>0.001162</td>
-      <td>0.000069</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0.471405</td>
-      <td>0.000000</td>
-      <td>0.009292</td>
-      <td>0.000212</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0.659966</td>
-      <td>0.000000</td>
-      <td>0.005708</td>
-      <td>0.000133</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>0.848528</td>
-      <td>0.000000</td>
-      <td>0.011236</td>
-      <td>0.000177</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>1.037090</td>
-      <td>0.000000</td>
-      <td>0.016069</td>
-      <td>0.000256</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>1.225650</td>
-      <td>0.000000</td>
-      <td>0.005005</td>
-      <td>0.000139</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>1.414210</td>
-      <td>0.000000</td>
-      <td>0.015602</td>
-      <td>0.000291</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>1.602780</td>
-      <td>0.000000</td>
-      <td>0.040657</td>
-      <td>0.000675</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>1.791340</td>
-      <td>0.000000</td>
-      <td>0.066398</td>
-      <td>0.001030</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>1.979900</td>
-      <td>0.000000</td>
-      <td>0.050528</td>
-      <td>0.000485</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>2.168460</td>
-      <td>0.000000</td>
-      <td>0.099718</td>
-      <td>0.000888</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>2.357020</td>
-      <td>0.962963</td>
-      <td>0.233222</td>
-      <td>0.002671</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>2.545580</td>
-      <td>0.037037</td>
-      <td>0.228611</td>
-      <td>0.001297</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>2.734150</td>
-      <td>0.000000</td>
-      <td>0.086435</td>
-      <td>0.000643</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>2.922710</td>
-      <td>0.000000</td>
-      <td>0.034954</td>
-      <td>0.000426</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>3.111270</td>
-      <td>0.000000</td>
-      <td>0.024995</td>
-      <td>0.000293</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>3.299830</td>
-      <td>0.000000</td>
-      <td>0.027375</td>
-      <td>0.000473</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>3.488390</td>
-      <td>0.000000</td>
-      <td>0.023944</td>
-      <td>0.000385</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>3.676960</td>
-      <td>0.000000</td>
-      <td>0.004778</td>
-      <td>0.000137</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>3.865520</td>
-      <td>0.000000</td>
-      <td>0.002125</td>
-      <td>0.000092</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>4.054080</td>
-      <td>0.000000</td>
-      <td>0.005167</td>
-      <td>0.000125</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>4.242640</td>
-      <td>0.000000</td>
-      <td>0.003500</td>
-      <td>0.000116</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>4.431200</td>
-      <td>0.000000</td>
-      <td>0.000083</td>
-      <td>0.000020</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>4.619760</td>
-      <td>0.000000</td>
-      <td>0.001574</td>
-      <td>0.000078</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>4.808330</td>
-      <td>0.000000</td>
-      <td>0.000347</td>
-      <td>0.000039</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>4.996890</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>5.185450</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>5.374010</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>1999</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>5.562570</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>1999</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
+plt.figure(figsize=(15, 5))
 plt.bar(
         last['#vel'], last['block_avg'], 
         yerr=last['err'], 
         width=last['#vel'].max()/30, edgecolor='black')
+
+plt.show()
 ```
 
 
-
-
-    <BarContainer object of 30 artists>
-
-
-
-
     
-![png](Readme_files/Readme_45_1.png)
+![png](Readme_files/Readme_38_0.png)
     
 
 
 ### Properties
 
+The properties measured in the evolution backwards and afterwards are simmetric. So the MD evolution has been succesfully reversed
+
 
 ```python
 K_btf=pd.read_csv('OUTPUT/bckwd/200bl/bw/kinetic_energy.dat', delimiter=r"\s+")
-```
-
-
-```python
 U_btf=pd.read_csv('OUTPUT/bckwd/200bl/bw/potential_energy.dat', delimiter=r"\s+")
-```
-
-
-```python
 P_btf=pd.read_csv('OUTPUT/bckwd/200bl/bw/pressure.dat', delimiter=r"\s+")
 ```
 
 
 ```python
+T_atf=pd.read_csv('OUTPUT/bckwd/200bl/fw/temperature.dat', skiprows=1, delimiter=r'\s+',names=['block','actual_T','T_ave','error'])
+K_atf=pd.read_csv('OUTPUT/bckwd/200bl/fw/kinetic_energy.dat', delimiter=r"\s+")
+U_atf=pd.read_csv('OUTPUT/bckwd/200bl/fw/potential_energy.dat', delimiter=r"\s+")
+P_atf=pd.read_csv('OUTPUT/bckwd/200bl/fw/pressure.dat', delimiter=r"\s+")
+```
+
+
+```python
 fig, ax = plt.subplots(4,2,  figsize=(12, 12))
-ax[0, 0].set_title('Temperature per block')
+ax[0, 0].set_title('Temperature per block backwards')
 
 # block averages
-ax[0, 0].plot(T_btf['block'], T_btf['actual_T'], '-*',color='g', alpha=0.1, label='block temperature') #sliced for better visualization
-
-# fit from MB
-#ax[0, 0].plot(T.block, fit_temp_ba, '--o', color='orange', label='block pofv-fitted temperature')
-#ax[0, 0].plot(T.block, fit_temp_pa, '--*', color='red', label='progressive pofv-fitted temperature')
-
-# progressive averages
-ax[0, 0].errorbar(T_btf['block'], T_btf['T_ave'], yerr=T_btf['error'],  label='progressive average')
-
+ax[0, 0].plot(T_btf['block'], T_btf['actual_T'], '-',color='g', label='block temperature') #sliced for better visualization
 ax[0, 0].set_ylabel('T')
 
-ax[0,1].set_title('Error on temperature')
-
-ax[0,1].plot(T_btf['block'], T_btf['error'], '-*')
-
-ax[0,1].set_ylabel(r'$\sigma_T$')
+ax[0, 1].set_title('Temperature per block forward')
+ax[0, 1].plot(T_atf['block'], T_atf['actual_T'], '-',color='g', alpha=1, label='block temperature') #sliced for better visualization
+ax[0, 1].set_ylabel('T')
 
 
-ax[1,0].set_title('Kinetic energy per block')
-# progressive averages
-ax[1,0].errorbar(K_btf['#BLOCK:'], K_btf['KE_AVE:'], yerr=K_btf['ERROR:'], label='progressive average')
-# block averages
-ax[1,0].plot(K_btf['#BLOCK:'], K_btf['ACTUAL_KE:'], '-*',color='g', alpha=0.1, label='block KE')
-#ax[1,0].scatter(K_d['#BLOCK:'], K_d['ACTUAL_KE:'], marker='*',color='g',alpha=0.3, label='block KE')
-
+ax[1,0].set_title('Kinetic energy per block backwards')
+ax[1,0].plot(K_btf['#BLOCK:'], K_btf['ACTUAL_KE:'], '-',color='g', alpha=1, label='block KE')
 ax[1,0].set_ylabel('KE')
 
 
-ax[1,1].set_title('Error on Kinetic energy')
-ax[1,1].plot(K_btf['#BLOCK:'], K_btf['ERROR:'], '-*')
-ax[1,1].set_ylabel(r'$\sigma_{KE}$')
+ax[1,1].set_title('Kinetic energy per block forward')
+ax[1,1].plot(K_atf['#BLOCK:'], K_atf['ACTUAL_KE:'], '-',color='g', alpha=1, label='block KE')
+ax[1,1].set_ylabel('KE')
 
 
-ax[2,0].set_title('Potential energy per block')
-ax[2,0].plot(U_btf['#BLOCK:'], U_btf['ACTUAL_PE:'], '-*', color='g', alpha=0.1, label='block UE')
-#ax[2,0].scatter(U_d['#BLOCK:'], U_d['ACTUAL_PE:'], marker='*',color='g', alpha=0.3, label='block UE')
-ax[2,0].errorbar(U_btf['#BLOCK:'], U_btf['PE_AVE:'], yerr=U_btf['ERROR:'], label='progressive average')
-#ax[0].set_xticks(range(0, T.block.max(), 15))#, rotation=45)
+ax[2,0].set_title('Potential energy per block backwards')
+ax[2,0].plot(U_btf['#BLOCK:'], U_btf['ACTUAL_PE:'], '-', color='g', alpha=1, label='block UE')
 ax[2,0].set_ylabel('UE')
 
-ax[2,1].set_title('Error on Potential energy')
-ax[2,1].plot(U_btf['#BLOCK:'], U_btf['ERROR:'], '-*')
-ax[2,1].set_ylabel(r'$\sigma_{UE}$')
+ax[2,1].set_title('Potential energy per block forward')
+ax[2,1].plot(U_atf['#BLOCK:'], U_atf['ACTUAL_PE:'], '-', color='g', alpha=1, label='block UE')
+ax[2,1].set_ylabel(r'${UE}$')
 
 
-ax[3,0].set_title('Pressure per block')
-ax[3,0].plot(P_btf['#BLOCK:'], P_btf['ACTUAL_P:'], '-*', color='g', alpha=0.1,label='block P')
-#ax[3,0].scatter(P_d['#BLOCK:'], P_d['ACTUAL_P:'], marker='*',color='g', alpha=0.3,label='block P')
-ax[3,0].errorbar(P_btf['#BLOCK:'], P_btf['P_AVE:'], yerr=P_btf['ERROR:'], label='progressive average')
+ax[3,0].set_title('Pressure per block backwards')
+ax[3,0].plot(P_btf['#BLOCK:'], P_btf['ACTUAL_P:'], '-', color='g', alpha=1,label='block P')
 ax[3,0].set_ylabel('P')
 
-ax[3,1].set_title('Error on Pressure')
-ax[3,1].plot(P_btf['#BLOCK:'], P_btf['ERROR:'], '-*')
-ax[3,1].set_ylabel(r'$\sigma_{P}$')
+ax[3,1].set_title('Pressure per block forward')
+ax[3,1].plot(P_atf['#BLOCK:'], P_atf['ACTUAL_P:'], '-', color='g', alpha=1,label='block P')
+ax[3,1].set_ylabel(r'${P}$')
 
 for k in range(4):
     for j in range(2):
         ax[k,j].grid()
         ax[k, j].set_xlabel('block')
-    ax[k, 0].legend()
 
 fig.tight_layout()
 
@@ -1187,16 +770,6 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_50_0.png)
+![png](Readme_files/Readme_42_0.png)
     
 
-
-
-```python
-
-```
-
-
-```python
-
-```

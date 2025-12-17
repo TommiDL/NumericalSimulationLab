@@ -1,4 +1,4 @@
-#include "../es1/func.h"
+#include "../es01/func.h"
 #include "probability.h"
 #include <fstream>
 

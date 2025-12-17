@@ -820,10 +820,16 @@ void System :: measure(){ // Measure properties
     _measurement(_index_temp) = (2.0/3.0) * kenergy_temp;
   // PRESSURE //////////////////////////////////////////////////////////////////
   if (_measure_pressure) 
-    _measurement[_index_pressure] = 
-      _rho * (2.0/3.0) * kenergy_temp 
-      + (_ptail*_npart + 48.0*virial/3.0)/_volume;
-  
+
+    if(_sim_type==0)  
+      _measurement[_index_pressure] = 
+        _rho * (2.0/3.0) * kenergy_temp 
+        + (_ptail*_npart + 48.0*virial/3.0)/_volume;
+    else
+      _measurement[_index_pressure] = 
+        _rho * _temp 
+        + (_ptail*_npart + 48.0*virial/3.0)/_volume;
+
   // SPECIFIC HEAT /////////////////////////////////////////////////////////////
   //save the square and adjust while averaging
   if (_measure_cv) 

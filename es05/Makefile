@@ -7,7 +7,7 @@ LOCAL_EXECUTABLES:= es5
 
 objects= func.o random.o probability.o
 
-headers= ../es1/func.h $(RNDDIR)random.h probability.h
+headers= ../es01/func.h $(RNDDIR)random.h probability.h
 
 #all: $(objects) $(LOCAL_EXECUTABLES) 
 
@@ -22,8 +22,8 @@ es5: es5.o $(objects)
 %.o: %.cpp $(header)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-func.o: ../es1/func.cpp ../es1/func.h
-	$(CC) -c ../es1/func.cpp -o func.o $(CFLAGS)  	
+func.o: ../es01/func.cpp ../es01/func.h
+	$(CC) -c ../es01/func.cpp -o func.o $(CFLAGS)  	
 
 random.o: $(RNDDIR)random.h $(RNDDIR)random.cpp
 	$(CC) -c $(RNDDIR)random.cpp -o random.o

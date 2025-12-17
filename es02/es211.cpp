@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../es1/func.h"
+#include "../es01/func.h"
 
 double integrand(double x)
 {

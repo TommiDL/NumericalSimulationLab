@@ -554,3 +554,5 @@ for i in range(3):
 ![png](Readme_files/Readme_30_0.png)
     
 
+
+The difference in the picture between the MD and MC simulations are probably caused by a mismatch in the temperature values  between the simualations (The MD simulation doesn't converge exactly at 1.1)

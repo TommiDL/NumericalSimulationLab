@@ -1,13 +1,13 @@
 CC = g++
 CFLAGS= -Wall -O3 --std=c++11
 
-RNDDIR=/home/tommaso/LSN/Parallel_number_generator_20250306/
+RNDDIR=../Parallel_number_generator_20250306/
 
 LOCAL_EXECUTABLES:= es21
 
 objects= func.o random.o random_walk.o
 
-headers= ../es1/func.h $(RNDDIR)random.h random_walk.h
+headers= ../es01/func.h $(RNDDIR)random.h random_walk.h
 
 #all: $(objects) $(LOCAL_EXECUTABLES) 
 
@@ -34,8 +34,8 @@ es222: es222.o $(objects)
 %.o: %.cpp $(header)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-func.o: ../es1/func.cpp ../es1/func.h
-	$(CC) -c ../es1/func.cpp -o func.o $(CFLAGS)  	
+func.o: ../es01/func.cpp ../es01/func.h
+	$(CC) -c ../es01/func.cpp -o func.o $(CFLAGS)  	
 
 random.o: $(RNDDIR)random.h $(RNDDIR)random.cpp
 	$(CC) -c $(RNDDIR)random.cpp -o random.o

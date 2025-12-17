@@ -4,9 +4,7 @@ AFLAGS = -larmadillo
 OBJS = population.o map.o random.o operators.o function.o 
 HEADS = random.h population.h operators.h map.h function.h
 
-all: ga.exe test
-test: test.o $(OBJS) $(HEADS)
-	$(CC) $(CFLAGS) test.o $(OBJS) -o test $(AFLAGS)
+all: ga.exe
 ga.exe : es10.o $(OBJS) $(HEADS)
 	$(CC) $(CFLAGS) es10.o $(OBJS) -o ga.exe $(AFLAGS)
 es10.o: es10.cpp $(HEADS)

@@ -276,6 +276,8 @@ plt.show()
 
 ### Histograms Heatmap 
 
+The image below represent the distribution of velocities for each block of the evolution
+
 
 ```python
 histos=pd.DataFrame(columns=['vel']+[f'block_{k}' for k in range(df_mb['block'].max())])
@@ -617,7 +619,7 @@ I runned the simulation backwards starting from the last configuration of a MD s
 The final block of the backward simulation returned to a delta distribution of velocities.
 
 
-The delta-starting simulation was computed with the following parameters"
+The delta-starting simulation was computed with the following parameters
 
 - TEMPERATURE= 2
 - NPART= 108

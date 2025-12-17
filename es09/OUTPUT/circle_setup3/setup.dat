@@ -5,3 +5,4 @@ Inversion probability = 0.3
 Permutation probability = 0.3
 Shift probability = 0.3
 Subpermutation probability = 0.3
+Number of evolution steps = 1000

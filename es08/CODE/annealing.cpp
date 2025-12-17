@@ -26,6 +26,9 @@ int main()
         cout << endl;
         SYS.cooling();    
     }
+    SYS.set_energy_filename(
+        "OUTPUT/final_energy.dat"
+    );
 
     SYS.compute_energy(false, false, true);
 

@@ -170,7 +170,7 @@ double System::compute_energy(bool paramnew, bool writepos, bool save_en)
     //_error=0;
 
     _naccepted=0;
-    _naccepted=0;
+    _nattempts=0;
 
     double m=(paramnew)?_new_mu:_mu;
     double s=(paramnew)?_new_sigma:_sigma;
@@ -186,6 +186,17 @@ double System::compute_energy(bool paramnew, bool writepos, bool save_en)
         }
         cen << "# mu = "<< m<< ", sigma = "<<s<<endl;
         cen << "BLOCK, ACTUAL_E, E_AVE, ERR" << endl;
+
+        cenacc.open(en_acceptance_filename);
+        if(!cen.is_open())
+        {
+            cerr << "ERROR: Unable to open " << en_acceptance_filename <<endl;
+            clog << "ERROR: Unable to open " << en_acceptance_filename <<endl;
+        }
+
+        cenacc << "# mu = "<< m<< ", sigma = "<<s<<endl;
+        cenacc << "acceptance" << endl;
+
     }
 
 
@@ -197,6 +208,11 @@ double System::compute_energy(bool paramnew, bool writepos, bool save_en)
             move(m, s);
             if(writepos) write_position();
             _block_avg+=local_en(_x, m, s);
+            if(save_en)
+            {
+                cenacc<<static_cast<double>(_naccepted)/_nattempts<<endl;
+                cout<< _naccepted << "\t" <<_nattempts<<"\t"<<static_cast<double>(_naccepted)/_nattempts<<endl;
+            }            
         }
 
         _block_avg /= _nsteps;
@@ -241,7 +257,7 @@ void System::anneal_move()
 
     _nanneal_attempts+=1;
 
-    copt << _temp<<", " << _nanneal_attempts%(_anneal_nsteps+1)<<", " 
+    copt << _temp<<", " << (_nanneal_attempts-1)%(_anneal_nsteps)<<", " 
          << _mu<<", " << _sigma<<", " << _nblocks<<", " 
          << _energy<<", " << _error<< endl;
     
@@ -433,6 +449,7 @@ void System::set_pos0(double x)
 void System::set_energy_filename(string filename)
 {
     this->en_filename=filename;
+    // cen.open(en_filename);
     return;
 }
 void System::set_optimization_filename(string filename)

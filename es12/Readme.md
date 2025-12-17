@@ -1,4 +1,4 @@
-# Libraries
+## Libraries
 
 
 ```python
@@ -11,6 +11,10 @@ seed=0
 np.random.seed(seed) # fix random seed
 tf.random.set_seed(seed)
 ```
+
+    2025-12-17 12:34:06.811997: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+    To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+
 
 ### Load and process the data
 
@@ -130,10 +134,12 @@ print('Model compiled successfully and ready to be trained.')
     Model compiled successfully and ready to be trained.
 
 
-### Step 5: evaluate performance on unseen data 
-
 # Exercise 12.1
-
+I set the number of epochs to 20 and tested the optimizers:
+- sgd
+- adam
+- rmsprop
+- adamax
 
 
 ```python
@@ -223,6 +229,8 @@ admx_hist=model_admx.fit(X_train, Y_train,
 
     2025-11-27 12:02:52.617763: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 188160000 exceeds 10% of free system memory.
 
+
+## Optimizers confront
 
 
 ```python
@@ -320,6 +328,12 @@ plt.show()
     
 
 
+In the graph are plotted the training and validation losses and accuracies for the explored optimizers.
+
+The best loss on training data was obtained with adam but on the validation dataset the loss grows along the number of epochs, probably due to overfitting. The same problems happen for the optimizer rms.
+
+Better performances are obtained for the optimizers adamax and sgd (which despite not reaching a good value for the loss doesn't seem to overfit the data)
+
 
 ```python
 def test_predictions(model, X_test,Y_test, title=''):
@@ -351,7 +365,7 @@ test_predictions(model=model_sgd, X_test=X_test,Y_test=Y_test, title='SGD')
 
 
     
-![png](Readme_files/Readme_23_1.png)
+![png](Readme_files/Readme_24_1.png)
     
 
 
@@ -360,7 +374,7 @@ test_predictions(model=model_sgd, X_test=X_test,Y_test=Y_test, title='SGD')
 
 
     
-![png](Readme_files/Readme_23_3.png)
+![png](Readme_files/Readme_24_3.png)
     
 
 
@@ -369,7 +383,7 @@ test_predictions(model=model_sgd, X_test=X_test,Y_test=Y_test, title='SGD')
 
 
     
-![png](Readme_files/Readme_23_5.png)
+![png](Readme_files/Readme_24_5.png)
     
 
 
@@ -378,7 +392,7 @@ test_predictions(model=model_sgd, X_test=X_test,Y_test=Y_test, title='SGD')
 
 
     
-![png](Readme_files/Readme_23_7.png)
+![png](Readme_files/Readme_24_7.png)
     
 
 
@@ -386,9 +400,10 @@ test_predictions(model=model_sgd, X_test=X_test,Y_test=Y_test, title='SGD')
 
 
 ```python
-# you will need the following for Convolutional Neural Networks
 from keras.layers import Flatten, Conv2D, MaxPooling2D, Input
 ```
+
+## Data generation
 
 
 ```python
@@ -431,9 +446,10 @@ print(X_test.shape[0], 'test samples')
     10000 test samples
 
 
+## Model definition
+
 
 ```python
-#THIS IS INCOMPLETE ... COMPLETE BEFORE EXECUTING IT
 
 def create_CNN():
     # instantiate model
@@ -443,10 +459,6 @@ def create_CNN():
     model.add(Conv2D(10, kernel_size=(5, 5),
                      activation='relu',
                      input_shape=input_shape))
-    #
-    # ADD HERE SOME OTHER LAYERS AT YOUR WILL, FOR EXAMPLE SOME: Dropout, 2D pooling, 2D convolutional etc. ... 
-    # remember to move towards a standard flat layer in the final part of your DNN,
-    # and that we need a soft-max layer with num_classes=10 possible outputs
     #
     model.add(MaxPooling2D(
         pool_size=(2,2), strides=2
@@ -467,6 +479,8 @@ def create_CNN():
                   metrics=['acc'])
     return model
 ```
+
+## Training the model
 
 
 ```python
@@ -588,6 +602,8 @@ print('Test accuracy:', score[1])
     Test accuracy: 0.9886999726295471
 
 
+## Examples of predictions
+
 
 ```python
 #X_test = X_test.reshape(X_test.shape[0], img_rows*img_cols)
@@ -609,9 +625,12 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_30_1.png)
+![png](Readme_files/Readme_35_1.png)
     
 
+
+## Performance evaluation
+Below are plotted the performance for the CNN and for the DNN with the adamax optimizer.
 
 
 ```python
@@ -637,7 +656,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_31_0.png)
+![png](Readme_files/Readme_37_0.png)
     
 
 
@@ -672,9 +691,11 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_32_0.png)
+![png](Readme_files/Readme_38_0.png)
     
 
+
+The CNN perform better on the dataset reaching a validation loss of 0.03 against the 0.059 of the DNN using adamax
 
 
 ```python
@@ -756,65 +777,6 @@ modelloaded.summary()
 
 
 ```python
-modelloaded.summary()
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_5"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ conv2d_10 (<span style="color: #0087ff; text-decoration-color: #0087ff">Conv2D</span>)              │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">24</span>, <span style="color: #00af00; text-decoration-color: #00af00">24</span>, <span style="color: #00af00; text-decoration-color: #00af00">10</span>)     │           <span style="color: #00af00; text-decoration-color: #00af00">260</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ max_pooling2d_10 (<span style="color: #0087ff; text-decoration-color: #0087ff">MaxPooling2D</span>) │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">12</span>, <span style="color: #00af00; text-decoration-color: #00af00">12</span>, <span style="color: #00af00; text-decoration-color: #00af00">10</span>)     │             <span style="color: #00af00; text-decoration-color: #00af00">0</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dropout_5 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dropout</span>)             │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">12</span>, <span style="color: #00af00; text-decoration-color: #00af00">12</span>, <span style="color: #00af00; text-decoration-color: #00af00">10</span>)     │             <span style="color: #00af00; text-decoration-color: #00af00">0</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ conv2d_11 (<span style="color: #0087ff; text-decoration-color: #0087ff">Conv2D</span>)              │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)       │         <span style="color: #00af00; text-decoration-color: #00af00">4,016</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ max_pooling2d_11 (<span style="color: #0087ff; text-decoration-color: #0087ff">MaxPooling2D</span>) │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)       │             <span style="color: #00af00; text-decoration-color: #00af00">0</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ flatten_5 (<span style="color: #0087ff; text-decoration-color: #0087ff">Flatten</span>)             │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">256</span>)            │             <span style="color: #00af00; text-decoration-color: #00af00">0</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_10 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">128</span>)            │        <span style="color: #00af00; text-decoration-color: #00af00">32,896</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_11 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">10</span>)             │         <span style="color: #00af00; text-decoration-color: #00af00">1,290</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">38,464</span> (150.25 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">38,462</span> (150.24 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Optimizer params: </span><span style="color: #00af00; text-decoration-color: #00af00">2</span> (12.00 B)
-</pre>
-
-
-
-
-```python
 #X_test = X_test.reshape(X_test.shape[0], img_rows*img_cols)
 predictions = modelloaded.predict(X_test)
 
@@ -829,35 +791,31 @@ for i in range(10):
 plt.show()
 ```
 
-    [1m 19/313[0m [32m━[0m[37m━━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 3ms/step   
+    [1m 17/313[0m [32m━[0m[37m━━━━━━━━━━━━━━━━━━━[0m [1m0s[0m 3ms/step   
 
-    2025-11-26 19:10:45.159559: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 31360000 exceeds 10% of free system memory.
+    2025-12-17 12:35:29.430239: W external/local_xla/xla/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 31360000 exceeds 10% of free system memory.
 
 
-    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 2ms/step
+    [1m313/313[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m1s[0m 3ms/step
 
 
 
     
-![png](Readme_files/Readme_39_3.png)
+![png](Readme_files/Readme_45_3.png)
     
 
 
 
 ```python
 files=os.listdir('images/')
-print(len(files))
-print(files)
-fig, ax =plt.subplots((len(files)+2)//3, 3, figsize=(15, 5))  
+fig, ax =plt.subplots(len(files), 2, figsize=(10, 3*len(files)))  
 
 for n,file in enumerate(files):
-    print(file)
     digit_filename = "./images/"+file
     digit_in = Image.open(digit_filename).convert('L')
     #digit_in = Image.open("8b.png").convert('L') #ON GOOGLE COLAB INSERT THE NAME OF THE UPLOADED FILE
 
     ydim, xdim = digit_in.size
-    print("Image size: "+str(xdim)+"x"+str(ydim))
     pix=digit_in.load();
     data = np.zeros((xdim, ydim))
     for j in range(ydim):
@@ -871,112 +829,52 @@ for n,file in enumerate(files):
     data1 = data1.reshape(1, xdim,ydim)
     # print(data1.shape)
     pred_0 = modelloaded.predict([data1])
+    ax[n, 0].imshow(data, cmap='gray')    
+    ax[n, 0].set_title("Digit predicted:  {}".format(np.argmax(pred_0)))
+    ax[n, 0].axis('off') 
 
-    print(n//3, n%3)
-    ax[n//3, n%3].imshow(data, cmap='gray')    
-    ax[n//3, n%3].set_title("Digit predicted:  {}".format(np.argmax(pred_0)))
-    ax[n//3, n%3].axis('off') 
+    ax[n,1].set_title('output layer distribution')
+    ax[n,1].bar(range(0,10), pred_0[0])
+    ax[n,1].set_xticks(range(0,10))
 plt.tight_layout()
 plt.show()
 ```
 
-    15
-    ['uno.png', 'sei.png', 'sette.png', 'otto.png', 'cinque.png', 'due.png', 'quattro_eur.png', 'quattro_usa.png', 'tre.png', 'nove1.png', 'nove2.png', 'tremoved.png', 'unomoved.png', 'tremv.png', 'ottomvd.png']
-    uno.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 56ms/step
-    0 0
-    sei.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 23ms/step
-    0 1
-    sette.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 24ms/step
-    0 2
-    otto.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 23ms/step
-
-
-    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/keras/src/models/functional.py:241: UserWarning: The structure of `inputs` doesn't match the expected structure.
-    Expected: input_layer_5
-    Received: inputs=('Tensor(shape=(1, 28, 28))',)
-      warnings.warn(msg)
-
-
-    1 0
-    cinque.png
-    Image size: 28x28
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 25ms/step
     [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 26ms/step
-    1 1
-    due.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 21ms/step
-    1 2
-    quattro_eur.png
-    Image size: 28x28
     [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 24ms/step
-    2 0
-    quattro_usa.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 21ms/step
-    2 1
-    tre.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 21ms/step
-    2 2
-    nove1.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 21ms/step
-    3 0
-    nove2.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 22ms/step
-    3 1
-    tremoved.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 21ms/step
-    3 2
-    unomoved.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 22ms/step
-    4 0
-    tremv.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 21ms/step
-    4 1
-    ottomvd.png
-    Image size: 28x28
-    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 22ms/step
-    4 2
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 24ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 27ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 23ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 24ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 27ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 26ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 25ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 24ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 26ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 31ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 27ms/step
+    [1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 30ms/step
 
 
 
     
-![png](Readme_files/Readme_40_3.png)
+![png](Readme_files/Readme_46_1.png)
     
 
 
-STATEMENT: NON LEGGE IMMAGINI RUOTATE E DECENTRATE
+The CNN performed well on ordinary data but not on images rotated or de-centered due to the fact that type of images are not part of the training dataset.
+
+## Filters
+
 
 
 ```python
 layer_index=0
 for layer in modelloaded.layers:
-    print(layer_index, layer.name)
+    # print(layer_index, layer.name)
     layer_index+=1
 ```
-
-    0 conv2d_10
-    1 max_pooling2d_10
-    2 dropout_5
-    3 conv2d_11
-    4 max_pooling2d_11
-    5 flatten_5
-    6 dense_10
-    7 dense_11
-
 
 
 ```python
@@ -1011,6 +909,6 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_43_1.png)
+![png](Readme_files/Readme_49_1.png)
     
 

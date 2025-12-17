@@ -18,7 +18,6 @@ def MB(v:np.array, temp:float,C:float):
 The Maxwell-Boltzmann distribution using LJ reduced units (Lenght: $\sigma$; Energy: $\epsilon$; Mass: the mass, $m$, of the particles; Temperature: $\epsilon/k_B$; velocity: $\sqrt{\epsilon/m}$) becomes:
 $$p(v^*,T^*) = \frac{1}{(2\pi T^*)^{3/2}} 4\pi (v^*)^2 e^{-\frac{(v^*)^2}{2 T^*}}$$
 
-<span style="color:red">Include the calculation of the Maxwell–Boltzmann distribution, $p(v^*,T^*)$, inside your Molecular Dynamics code by using data blocking to obtain single block averages, progressive average values and progressive uncertainties for $p(v^*,T^*)$.</span>
 
 ## Implementation
 
@@ -798,7 +797,7 @@ plt.show()
 
 ```python
 last=df_btf.loc[df_btf['block']==df_btf['block'].max()].reset_index(drop=True)
-last
+
 ```
 
 

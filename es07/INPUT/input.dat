@@ -5,10 +5,10 @@ NPART                  108
 RHO                    0.8
 R_CUT                  2.5
 DELTA                  0.001
-NBLOCKS                200
+NBLOCKS                100
 NSTEPS                 2000
 TAILCORRECTION         true
 DISTRIBUTION	       0
-EQSTEPS                0
+EQSTEPS                2000
 
 ENDINPUT

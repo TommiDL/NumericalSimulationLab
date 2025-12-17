@@ -44,7 +44,7 @@ class System
         ofstream clog;
         ofstream copt;
         ofstream cen;
-
+        ofstream cenacc;
 
         double avg, avg2;
         double _block_avg;

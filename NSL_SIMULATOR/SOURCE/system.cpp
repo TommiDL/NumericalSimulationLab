@@ -457,6 +457,7 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _index_pressure = index_property;
         index_property++;
         _ptail = (_tail_correction)? 32*M_PI*_rho*(1/(9.*pow(_r_cut, 9)) -1./(6.*pow(_r_cut, 3))) : 0. ; // TO BE FIXED IN EXERCISE 7
+        cout << "Pressure tail correction "<< _ptail<<"\n";
       } else if( property == "GOFR" ){
         ofstream coutgr("../OUTPUT/gofr.dat");
         coutgr << "#DISTANCE:     AVE_GOFR:        ERROR:" << endl;

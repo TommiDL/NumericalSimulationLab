@@ -204,19 +204,19 @@ df['beta']=1./df['TEMP']
 
 ```
 
-    /tmp/ipykernel_12655/2028137045.py:1: ParserWarning: Falling back to the 'python' engine because the 'c' engine does not support regex separators (separators > 1 char and different from '\s+' are interpreted as regex); you can avoid this warning by specifying engine='python'.
+    /tmp/ipykernel_4317/2028137045.py:1: ParserWarning: Falling back to the 'python' engine because the 'c' engine does not support regex separators (separators > 1 char and different from '\s+' are interpreted as regex); you can avoid this warning by specifying engine='python'.
       df=pd.read_csv('CODE/OUTPUT/config2/optimization.dat',sep=", " )
 
 
-In the following image we can see that along the cooling process (each temperature has a different color) the energy distribution tend to converge at the minimum value of -0.448042
+In the following image we can see that along the cooling process (each temperature has a different color) the energy distribution tend to converge at the minimum value of -0.435268.
 
 
 
 ```python
-print(df.EN.min())
+print(df.EN[df.index[-1]])
 ```
 
-    -0.448042
+    -0.435268
 
 
 
@@ -239,110 +239,17 @@ plt.show()
 
 
 ```python
-dflast=df.loc[df.STEP==600]
+dflast=df.loc[df.STEP==599]
 dflast['beta']=1./dflast['TEMP']
-dflast.head()
+
 ```
 
-    /tmp/ipykernel_12655/4103404036.py:2: SettingWithCopyWarning: 
+    /tmp/ipykernel_4317/2092238972.py:2: SettingWithCopyWarning: 
     A value is trying to be set on a copy of a slice from a DataFrame.
     Try using .loc[row_indexer,col_indexer] = value instead
     
     See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
       dflast['beta']=1./dflast['TEMP']
-
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>TEMP</th>
-      <th>STEP</th>
-      <th>MU</th>
-      <th>SIGMA</th>
-      <th>BLOCK</th>
-      <th>EN</th>
-      <th>ERR</th>
-      <th>beta</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>599</th>
-      <td>4.00000</td>
-      <td>600</td>
-      <td>0.561883</td>
-      <td>1.348360</td>
-      <td>300</td>
-      <td>0.925466</td>
-      <td>0.005243</td>
-      <td>0.250000</td>
-    </tr>
-    <tr>
-      <th>1200</th>
-      <td>2.77778</td>
-      <td>600</td>
-      <td>0.375583</td>
-      <td>-0.770210</td>
-      <td>300</td>
-      <td>-0.186023</td>
-      <td>0.000674</td>
-      <td>0.360000</td>
-    </tr>
-    <tr>
-      <th>1801</th>
-      <td>2.31481</td>
-      <td>600</td>
-      <td>-1.244620</td>
-      <td>-0.412279</td>
-      <td>300</td>
-      <td>0.606369</td>
-      <td>0.002070</td>
-      <td>0.432001</td>
-    </tr>
-    <tr>
-      <th>2402</th>
-      <td>1.92901</td>
-      <td>600</td>
-      <td>-0.649316</td>
-      <td>-0.855456</td>
-      <td>300</td>
-      <td>-0.283865</td>
-      <td>0.002687</td>
-      <td>0.518401</td>
-    </tr>
-    <tr>
-      <th>3003</th>
-      <td>1.60751</td>
-      <td>600</td>
-      <td>-0.570585</td>
-      <td>-0.751387</td>
-      <td>300</td>
-      <td>-0.301601</td>
-      <td>0.002807</td>
-      <td>0.622080</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 
 
 In the graph below it's shown the last energy value for each Temperature step with the statistical uncertainty computed in the MC evaluation of the energy integral.
@@ -405,8 +312,8 @@ print('sigma = ', dflast['SIGMA'][dflast.index[-1]])
 plt.tight_layout()
 ```
 
-    mu= 0.778989
-    sigma =  -0.619258
+    mu= 0.841978
+    sigma =  -0.629806
 
 
 
@@ -449,8 +356,8 @@ ax[1].legend()
 plt.tight_layout()
 ```
 
-    mu= 0.778989
-    sigma =  -0.619258
+    mu= 0.841978
+    sigma =  -0.629806
 
 
 
@@ -462,29 +369,54 @@ plt.tight_layout()
 Finally below there is a picture of the $|\psi(x)|^2$ corresponding to the final value of the annealing process.
 
 
+
+
 ```python
 final_wf=pd.read_csv('CODE/OUTPUT/config2/final_wf.dat', skiprows=1)
+
 ```
 
 
 ```python
+final_en=pd.read_csv('CODE/OUTPUT/config2/final_energy.dat', skiprows=1,sep=', ')
+
+```
+
+    /tmp/ipykernel_4317/2611601275.py:1: ParserWarning: Falling back to the 'python' engine because the 'c' engine does not support regex separators (separators > 1 char and different from '\s+' are interpreted as regex); you can avoid this warning by specifying engine='python'.
+      final_en=pd.read_csv('CODE/OUTPUT/config2/final_energy.dat', skiprows=1,sep=', ')
+
+
+
+```python
 # Plot a few things
-plt.figure(figsize=(8,5))
-scale = 0.3
-plt.plot(x,(psi[0])**2, label='GS probability')
-plt.hist(final_wf.pos, bins=100, density=True, linewidth=0.5, edgecolor="black", label='Final WF')
-plt.title("Probabilities")
-plt.xlabel("x")
-plt.grid(True)
-plt.xlim((-3,3))
-plt.ylim((-0.1,0.6))
-plt.legend()
+plt.figure(figsize=(15,5))
+# scale = 0.3
+
+ax = plt.subplot(1,2,1)
+
+ax.plot(x,(psi[0])**2, label='GS probability')
+ax.hist(final_wf.pos, bins=100, density=True, linewidth=0.5, edgecolor="black", label='Final WF')
+ax.set_title("Probabilities")
+ax.set_xlabel("x")
+ax.grid(True)
+ax.set_xlim((-3,3))
+ax.set_ylim((-0.1,0.6))
+ax.legend()
+
+ax = plt.subplot(1,2,2)
+ax.errorbar(
+    final_en['BLOCK'], final_en['E_AVE'], 
+    yerr=final_en['ERR'], label='avg'
+    )
+ax.plot(final_en['BLOCK'], final_en['ACTUAL_E'], alpha=0.5, label='actual')
+
+
 plt.show()
 ```
 
 
     
-![png](Readme_files/Readme_21_0.png)
+![png](Readme_files/Readme_22_0.png)
     
 
 

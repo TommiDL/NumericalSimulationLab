@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 # Exercise 6.1
 
-aggiungi implementazione codice e calcolo proprieta
 
 ## Code implementation
 
@@ -69,6 +68,7 @@ for(int ts=0; ts<nstep_temp; ts++)
 }
 ```
 ### Measure of internal energy
+Inside the `measure` function i implemented the measure of internal energy as
 ```C++
 double s_i, s_j;
 for (int i=0; i<_npart; i++){
@@ -81,6 +81,7 @@ _measurement(_index_tenergy) = tenergy_temp;
 ```
 
 ### Measure of Magnetization and Susceptibility
+Inside the `measure` function i implemented the measure of Magnetization and Susceptibility as
 ```C++
 if(_measure_chi or _measure_magnet)
   {
@@ -272,7 +273,7 @@ plt.show()
     
 
 
-forse qua da cambiare con le distanze rispetto ai real values
+Below are reported the percentual distance respect the real values of both methods.
 
 
 ```python
@@ -311,16 +312,3 @@ plt.show()
 ![png](Readme_files/Readme_10_0.png)
     
 
-
-
-```python
-cvs=pd.read_csv('OUTPUT/specific_heat_T.dat', delimiter=r"\s+")
-Ma=pd.read_csv('OUTPUT/magnetization_T.dat', delimiter=r"\s+")
-TE=pd.read_csv('OUTPUT/total_energy_T.dat', delimiter=r"\s+")
-Xs=pd.read_csv('OUTPUT/susceptibility_T.dat', delimiter=r"\s+")
-```
-
-
-```python
-
-```

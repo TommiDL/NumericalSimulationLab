@@ -130,7 +130,39 @@ plt.show()
 
 both the radius and the variance converge at a value whom distance from the actual value is less than one standard deviation
 
-# $\chi^2$
+# $\chi^2$ values
+
+I implemented the $\chi^2$ calculation as:
+
+```C++
+//iterate on the distributions
+for(int k=0; k<Ndist; ++k)
+{
+    float chi2=0.;
+    //for every subinterval save 
+    // number of point detected
+    vector<int> ni(M, 0);
+    //generate points
+    for (int i=0; i<n; ++i)
+    {
+        float r=rnd.Rannyu();
+        for(int j=0; j<M; ++j)  
+        {
+            if (r<(j+1)/static_cast<float>(M))
+            {
+                ni[j]+=1;
+                break;
+            }
+        }		
+    }  
+    float nM=n/static_cast<float>(M);
+    //compute chi2		
+    for (int j=0; j<M; ++j)
+        chi2+=pow(ni[j]-nM, 2);
+    chi2/=(nM);    
+    chi_vec[k]=chi2;
+}
+```
 
 
 ```python
@@ -203,6 +235,8 @@ plt.show()
 ![png](Readme_files/Readme_11_0.png)
     
 
+
+The mean value of $\chi^2$ it's compatible with the expected value 100
 
 ## Exercise 01.2
 
@@ -283,7 +317,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_15_0.png)
+![png](Readme_files/Readme_16_0.png)
     
 
 
@@ -330,8 +364,11 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_17_0.png)
+![png](Readme_files/Readme_18_0.png)
     
+
+
+Both the sums generated from an exponential and a uniform distribution converge to a gaussian distribution due to the central limit theorem
 
 
 ## Cauchy-Lorentz
@@ -379,11 +416,12 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_19_0.png)
+![png](Readme_files/Readme_21_0.png)
     
 
 
-dire qualcosa sul fatto che cauchy ha media e varianza non def quindi no clt|
+The sums generated starting from the cauchy lorentz distribution do not converge to a gaussian distribution due to the fact that the cachy-lorentz doesn't have finite expected value and sigma value.
+
 
 ### Exercise 01.3
 
@@ -424,6 +462,9 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_23_0.png)
+![png](Readme_files/Readme_25_0.png)
     
+
+
+The values converge to the real value of pi with distance less than one standard deviation.
 

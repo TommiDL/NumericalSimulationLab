@@ -46,6 +46,7 @@ import matplotlib.pyplot as plt
 ```
 
 # Exercise 03.1
+
 ## Direct sampling of the final asset price 
 
 Strike price implementation:
@@ -55,7 +56,9 @@ following a GBM evolution with
 - S0 initial asset price
 - mu drift value
 - sigma volatility  
+
 ```C++
+
 double S(
 	double t, 
 	double S0, double mu, double sigma, 
@@ -67,6 +70,7 @@ double S(
 	return S0*( exp((mu-0.5*sigma*sigma)*t + sigma*W ) ) ;
 }
 ```
+
 Below the code snippet to update the block average (not progressive) of strike price and call and put options
 
 ```C++
@@ -332,18 +336,3 @@ plt.show()
 ![png](Readme_files/Readme_8_0.png)
     
 
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```

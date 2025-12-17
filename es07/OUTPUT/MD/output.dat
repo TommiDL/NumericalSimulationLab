@@ -8,7 +8,7 @@ NBLOCKS= 500000
 NSTEPS= 1
 TAIL CORRECTION INCLUDED
 INITIAL DISTRIBUTION TYPE= Maxwell-Boltzmann
-2000 EQUILIBRATION STEPS
+0 EQUILIBRATION STEPS
 Reading input completed!
 System initialized!
 Reading properties completed!

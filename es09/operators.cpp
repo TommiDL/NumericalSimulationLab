@@ -325,24 +325,6 @@ pair<crom, crom> crossing::cross(crom parent1, crom parent2)
         (this->_rnd.Rannyu(1, N));
     
 
-    // cout << "crossing point "<< crosspoint<<"\n";
-
-
-    // cout << "parent1 = [";
-    // for(int k=0; k<parent1.size();k++)
-    // {
-    //     if(k==crosspoint) cout << "| ";
-    //     cout << parent1[k]<< " ";
-    // }
-    // cout << "]\n";
-
-    // cout << "parent2 = [";
-    // for(int k=0; k<parent2.size();k++)
-    // {
-    //     if(k==crosspoint) cout << "| ";
-    //     cout << parent2[k]<< " ";
-    // }
-    // cout << "]\n";
 
     crom support = parent2;
     
@@ -356,8 +338,6 @@ pair<crom, crom> crossing::cross(crom parent1, crom parent2)
         ));
     
 
-    // cout << "\tspurged parent2\n\t\t";
-    // print(support);
 
     for(int k=0; k<support.size(); k++)
     {

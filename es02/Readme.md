@@ -13,9 +13,7 @@ df_is=pd.read_csv('data/cosinteg_M1000000_is.csv')
 
 ```
 
-
 It's clearly visible that using the first order taylor expansion in $x=1$ of the cos function the convergence is faster with a minor variance
-
 
 
 
@@ -146,8 +144,6 @@ vector<double> RW_lattice::dir_increment(double p_x, double p_y, double p_z)
 		return vector<double> {0., 1., 0.};
 	else
 		return vector<double> {0., 0., 1.};
-		
-	
 }
 
 ```
@@ -167,8 +163,6 @@ vector<double> RW_continuous::dir_increment(double p_x, double p_y, double p_z)
 		sin(theta)*sin(phi),
 		cos(theta)
 	};
-	
-	
 }
 
 ```
@@ -225,7 +219,10 @@ plt.show()
     
 
 
-To compute the mean value of the explored distance of the Random Walk, $10^4$ relization of the RW were computed and distributed along 100 blocks on which it was calculated the progressive average at every step storing it as a matrix step x block
+To compute the mean value of the explored distance of the Random Walk, $10^4$ relization of the RW were computed and distributed along 100 blocks.
+
+On those blocks was calculated the progressive average for every step value storing the results of the progressive averages in the rows of a matrix with dimensions nstep x nblock
+
 
 
 ## Data Visualization

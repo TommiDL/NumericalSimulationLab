@@ -74,7 +74,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.utils import get_custom_objects
 ```
 
-    2025-12-03 12:25:07.052840: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+    2025-12-17 09:43:56.442633: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
     To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
 
 
@@ -176,6 +176,9 @@ print('bias prediction', b_pred)
 
 ## Variation along number of epochs
 
+I tested the linear model plotting the loss on train and validation dataset up to 100 epochs with a white noise carachterized by $\sigma=0.1$
+
+Both the validation and the training loss perform better with an higher number of epochs
 
 
 ```python
@@ -271,6 +274,9 @@ print('bias prediction         :', b_pred)
 
 ## Variation of train dataset dimension
 
+I first tested the linear model passing gradually bigger slices of the train dataset keeping the number of epochs fixed.
+
+After some initial oscillation a convergent behaviour emerge when the training dataset dimension grow.
 
 
 ```python
@@ -323,6 +329,8 @@ plt.show()
 We can se that both the the training and the validation loss converge to a minimum while growing the train dataset dimension 
 
 ### Variation of train dimension with different epochs
+
+I repeted the process varying the number of epochs. It's visible how an higher number of epochs return a more regular behaviour and better performance on the data.
 
 
 ```python
@@ -398,6 +406,10 @@ plt.show()
 
 ## White Noise
 
+I tested the model varying the value of sigma in the interval [0,2] with a 0.1 step at a fixed number of epochs and using the whole training dataset.
+
+It's visible how the model perform less on more noisy data.
+
 
 ```python
 import numpy as np
@@ -443,15 +455,6 @@ for n, sigma in enumerate(sigmas):
   x_predicted = np.random.uniform(-1, 1, 100)
   y_predicted = model.predict(x_predicted)
 
-  """if n%10==0:
-      axs[(n/10)//4, (n/10)%4].set_title(f'data with noise {"%.2f" % sigma}')
-      axs[(n/10)//4, (n/10)%4].scatter(x_train, y_train, label='train')
-      axs[(n/10)//4, (n/10)%4].scatter(x_valid, y_valid, label='validation')
-      axs[(n/10)//4, (n/10)%4].plot(x_predicted, y_predicted, c='r', label='prediction')
-
-      axs[(n/10)//4, (n/10)%4].legend()
-      axs[(n/10)//4, (n/10)%4].set_ylim([-3.1, 3.1])
-    """
 
   sigma_loss.append(history.history['loss'][-1])
   sigma_val_loss.append(history.history['val_loss'][-1])
@@ -461,15 +464,81 @@ for n, sigma in enumerate(sigmas):
 
 ```
 
+    		--> sigma 0.0 <--
+
+
+    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/keras/src/layers/core/dense.py:93: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 0.1 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 0.2 <--
+    WARNING:tensorflow:5 out of the last 9 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x7faeec2f1300> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+    [1m1/4[0m [32m━━━━━[0m[37m━━━━━━━━━━━━━━━[0m [1m0s[0m 30ms/stepWARNING:tensorflow:6 out of the last 12 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x7faeec2f1300> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 12ms/step
+    		--> sigma 0.30000000000000004 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 12ms/step
+    		--> sigma 0.4 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 14ms/step
+    		--> sigma 0.5 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 0.6000000000000001 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 0.7000000000000001 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 10ms/step
+    		--> sigma 0.8 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 0.9 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 1.0 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 13ms/step
+    		--> sigma 1.1 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 1.2000000000000002 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 12ms/step
+    		--> sigma 1.3 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 10ms/step
+    		--> sigma 1.4000000000000001 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 10ms/step
+    		--> sigma 1.5 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 12ms/step
+    		--> sigma 1.6 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+    		--> sigma 1.7000000000000002 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 10ms/step
+    		--> sigma 1.8 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 9ms/step 
+    		--> sigma 1.9000000000000001 <--
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 11ms/step
+
+
+    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/matplotlib/_tight_bbox.py:67: RuntimeWarning: divide by zero encountered in scalar divide
+      fig.patch.set_bounds(x0 / w1, y0 / h1,
+    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/matplotlib/_tight_bbox.py:68: RuntimeWarning: divide by zero encountered in scalar divide
+      fig.bbox.width / w1, fig.bbox.height / h1)
+    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/matplotlib/patches.py:797: RuntimeWarning: invalid value encountered in scalar add
+      y1 = self.convert_yunits(self._y0 + self._height)
+    /home/td/miniconda3/envs/dl/lib/python3.12/site-packages/matplotlib/transforms.py:2036: RuntimeWarning: invalid value encountered in scalar add
+      self._mtx[1, 2] += ty
+
+
+
+    
+![png](Readme_files/Readme_20_4.png)
+    
+
+
 
 ```python
-plt.figure(figsize=(8, 3))
+plt.figure(figsize=(15, 3))
 
 plt.plot(sigmas, sigma_loss, marker='*',label='train loss')
 plt.plot(sigmas, sigma_val_loss, marker='o', label='validation loss')
 
 plt.xlabel('noise')
-
+plt.ylabel('loss')
 plt.title('MSE')
 plt.legend()
 plt.grid()
@@ -477,22 +546,46 @@ plt.show()
 ```
 
 
+    
+![png](Readme_files/Readme_21_0.png)
+    
+
+
+Below i plotted the linear fit parameters along the values of sigma explored.
+
+The estimated values of the model seem to distribute near the real values.
+
+
 ```python
-fig, ax = plt.subplots(1,2, figsize=(10,3))
+fig, ax = plt.subplots(1,2, figsize=(15,3))
 
 ax[0].set_title('linear regression weights')
 ax[0].plot(sigmas, weights, '--d')
+ax[0].hlines(2, 0, 1.9, colors='r')
 ax[0].grid()
 ax[0].set_xlabel('sigma')
+ax[0].set_ylabel('m')
+
 
 ax[1].set_title('linear regression biases')
 ax[1].plot(sigmas, biases, '--^')
+ax[1].hlines(1, 0, 1.9, colors='r')
 ax[1].grid()
 ax[1].set_xlabel('sigma')
 plt.show()
 ```
 
+
+    
+![png](Readme_files/Readme_23_0.png)
+    
+
+
 ### Uniform search on parameters (x_train_dimension, epochs) for different values of sigma
+I generated different values of the train dataset dimension, the number of epochs and the values of sigma following a uniform distribution using the function `regression_search` defined in the file [model_def.py](model_def.py).
+
+
+Then i plotted the loss functions for different sigma values along the train dataset's dimension and the number of epochs
 
 
 ```python
@@ -693,17 +786,15 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_26_0.png)
+![png](Readme_files/Readme_27_0.png)
     
 
 
-chiedersi se la dimensione del training ha una legge di scala che dipende da sigma
-
-It's visible that the best fits are obtained with the max number of epochs and train dataset dimension
+Both validation and training loss show a convergent behaviour along the growing of the number of epochs and train dataset's dimension for each value of sigma.
 
 
 ```python
-plt.figure(figsize=(8,5))
+plt.figure(figsize=(15,5))
 plt.title('best loss varying sigma')
 plt.plot(
     grid.sort_values(by='sigma')['sigma'].unique(),
@@ -750,8 +841,13 @@ Find good (& reasonable) choices for:
 - the optimizer
 - the loss function
   
-Check your NN model by seeing how well your fits predict newly generated test data (including on data outside the range you fit. How well do your NN do on points in the range of $x$ where you trained the model? How about points outside the original training data set?
-Summarize what you have learned about the relationship between model complexity (number of parameters), goodness of fit on training data, and the ability to predict well.
+Check your NN model by seeing how well your fits predict newly generated test data (including on data outside the range you fit. 
+
+- How well do your NN do on points in the range of $x$ where you trained the model? 
+- How about points outside the original training data set?
+- Summarize what you have learned about the relationship between model complexity (number of parameters), goodness of fit on training data, and the ability to predict well.
+
+## Data generation
 
 
 ```python
@@ -819,10 +915,7 @@ plt.show()
     
 
 
-# Testing architectures
-in the file [model_def.py](model_def.py) the function test_arch(line 139) is used to select the best performing NN architecture at fixed number of layers, optimizer and activation function testing all the possible combination in n_layers of different neuron's numbers per layer.
-
-
+## Model definition
 
 
 ```python
@@ -832,17 +925,8 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-```
-
-    2025-10-03 15:04:13.889262: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
-    To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-
-
-
-```python
 import pandas as pd
 from tensorflow.keras.layers import Dense, Activation, Input
-
 ```
 
 
@@ -940,7 +1024,11 @@ mnn.summary()
 
 
 
-Sotto un esempio per reti a due layer allenate con ottimizzatore sgd a 60 epoche in cui vengono testate le combinazini di possibili neuroni per layer: [2, 4, 8, 16, 32]
+## Testing architectures
+in the file [model_def.py](model_def.py) the function test_arch(line 139) is used to select the best performing NN architecture at fixed number of layers, optimizer and activation function testing all the possible combination in n_layers of different neuron's numbers per layer (specified in input).
+
+
+Below i writed an example for NN with 2 layers,trained with the optimizer sgd and activation relu using 60 epochs. The function test all the possible combination on two layers of the number of neurons per layer: [2, 4, 8, 16, 32]
 
 
 ```python
@@ -970,6 +1058,8 @@ print('Corresponding neurons combination: ', combs[bindex])
 
     
 
+
+The best performing NN has 4 neurons in the first layer and 8 on the second with a validation loss of 0.031055059283971786.
 
 
 ```python
@@ -1004,9 +1094,10 @@ plt.tight_layout()
     
 
 
-The code for visualizing Neural network is slightly modified from the function posted [here](https://stackoverflow.com/questions/29888233/how-to-visualize-a-neural-network)
+The code for visualizing Neural network is slightly modified from the function posted [here](https://stackoverflow.com/questions/29888233/how-to-visualize-a-neural-network) on stack overflow
 
-Facendo un paragone tra i risultati ottenuti con diversi ottimizzatori e funzioni di attivazione al variare del numero di layer si ottiene:
+
+I repeted this process varying the number of layer for different optimizers and activation functions and plotted the results in the graph below.
 
 
 ```python
@@ -1041,11 +1132,6 @@ for opt in ['sgd','adam','lion', 'adagrad']:
         ax[1].set_title('loss')
         line, = ax[1].plot(min_loss, lw=2.5)
 
-        #combs = combfromfile(opt+'/'+act+'/combination.dat')
-        #for k in range(len(combs)):
-        #    print(numparam(combs[k]), min_loss[k])
-        #    ax[1].annotate(numparam(combs[k]), (k, min_loss[k]))
-        # text to the left 
         y_pos = min_loss[0]
         ax[1].text(-1, y_pos, pref,
             color=line.get_color())#, transform=trans)
@@ -1054,8 +1140,6 @@ for opt in ['sgd','adam','lion', 'adagrad']:
 
 
 for k in range(2):
-    # Ensure that the axis ticks only show up on the bottom and left of the plot.
-    # Ticks on the right and top of the plot are generally unnecessary.
     #ax[k].spines[:].set_visible(False)
 #    ax[k].tick_params(axis='both', which='both', labelsize='large',
 #                   bottom=False, top=False, labelbottom=True,
@@ -1079,7 +1163,11 @@ plt.show()
     
 
 
-Questo grafico non e' particolarmente informativo perche' il numero di neuroni per layer determina il numero di parametri che crescendo dovrebbero garantire una maggiore espressivita' per la rete, quello che cerchiamo e' una rete sufficientemente espressiva da produrre una buona stima senza imparare l'errore presente nei dati di training.
+This graph it's not much informative because shows only the number of layers and not the number of neurons per layer. The number of neurons per layer determine the number of parameters contained by the NN, and the growth of the number of parameters should allow a greater expressibility.
+
+The goal is to find a sufficient expressive network to produce a good estimation of our function without learn to reproduce the noise of the training data.
+
+So i remade the plot with the number of parameters on the x-axis but due to the implementation of the best NN search i wrote the data are extremely dishomogeneous.
 
 
 ```python
@@ -1158,19 +1246,10 @@ plt.show()
     
 
 
-Si puo' vedere che al crescere del numero di parametri nei casi selezionati la loss migliore tende a diminuire 
+It'still visible a convergent behaviour of the loss function, with some exception for worst performing combinations, while the number of parameters grow.
 
 
-```python
-os.listdir('sgd')
-```
-
-
-
-
-    ['relu', 'tanh', 'sigmoid']
-
-
+Below are reported the loss functions on the validation dataset of those architectures divided in the used optimizer-activation function combinations.
 
 
 ```python
@@ -1207,11 +1286,11 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_54_0.png)
+![png](Readme_files/Readme_53_0.png)
     
 
 
-Non sembrano emergere casi particolarmente terribili di overfitting nelle reti esplorate
+From those graphs doesn't seem to emerge an overfitting behaviour.
 
 
 ```python
@@ -1245,14 +1324,15 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_56_0.png)
+![png](Readme_files/Readme_55_0.png)
     
 
 
-I piu' competitivi a livello di dimensioni e prestazioni(validation loss) sono confrontati qua sotto:
-- sgd  - relu 2 layers [64 params]
-- sgd  - tanh 2 layers [14  params]
-- lion - tanh 1 layers [96  params]
+I selected the more competitive realizations based on the network dimension and the perfomance (measured by validation loss)"
+
+- sgd  - relu 2 layers [64 parameters]
+- sgd  - tanh 2 layers [14  parameters]
+- lion - tanh 1 layers [96  parameters]
 
 
 ```python
@@ -1294,7 +1374,7 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_58_0.png)
+![png](Readme_files/Readme_57_0.png)
     
 
 
@@ -1323,11 +1403,13 @@ plt.show()
 
 
     
-![png](Readme_files/Readme_59_0.png)
+![png](Readme_files/Readme_58_0.png)
     
 
 
-la rete con ottimizzatore sgd e funzione di attivazione tanh sembra performare molto bene con un numero molto basso ma porebbe essere dovuto a una scelta particolarmente fortunata dei parametri quindi proviamo a riprodurla un paio di volte con inizializzazione randomica dei pesi per vedere se siamo stati semplicemente molto fortunati
+The network with optimizer sgd and activation tanh seem to perform well with a low number of parameters (so not computationally expensive) but it could be just a very lucky choose of initial parameters.
+
+So i decided to reproduce some realization of the same network with a randomic initialization of the weights to see if the results were reproduced.
 
 
 ```python
@@ -1404,9 +1486,11 @@ ax[1].legend()
 
 
     
-![png](Readme_files/Readme_62_2.png)
+![png](Readme_files/Readme_61_2.png)
     
 
+
+I plotted the final values of the validation losses in a histogram to see how they distributed.
 
 
 ```python
@@ -1424,11 +1508,16 @@ plt.show()
     
 
 
-La conclusione e' che anche una rete cosi' piccola puo' fare un buon fit anche se evidentemente su reti piu' grandi le capacita' di previsione migliorano
+It'seem that also these NN with a small dimension can produce a good fit, even if growing the size of the Network the prevision abilities improve.
 
 ### Loss function
 
+I tested various architectures, with optimizer sgd and activation function relu, optimizing on 3 different loss functions:
+- MSE
+- MAE (mean absolute error)
+- MSLE (mean squared logarithmic error)
 
+To compare them i reported below the predictions obtained.
 
 
 ```python
@@ -1465,14 +1554,12 @@ plt.show()
     
 
 
+MSE and MAE seems to performa equal, while the MSLE loss function didn't produce a good estimation of the polynomial function.
 
-```python
+### Data outside training range
 
-```
+I then tested the 3 best performing models showed before outside the training dataset's range. 
 
-### data outside training range
-
-Proviamo a prendere i modelli best fuori dal range
 
 
 ```python
@@ -1504,631 +1591,33 @@ hist_msr = msgdr.fit(
             x=x_train, y=y_train,
             batch_size=32, epochs=100,
             shuffle=True, validation_data=(x_valid, y_valid),
-            verbose=1
+            verbose=0
 )
 print('\t\tsgd - tanh')
 hist_mst = msgdt.fit(
             x=x_train, y=y_train,
             batch_size=32, epochs=100,
             shuffle=True, validation_data=(x_valid, y_valid),
-            verbose=1
+            verbose=0
 )
 print('\t\tlion - tanh')
 hist_mlt = mliot.fit(
             x=x_train, y=y_train,
             batch_size=32, epochs=100,
             shuffle=True, validation_data=(x_valid, y_valid),
-            verbose=1
+            verbose=0
 )
 ```
 
-    sgd - relu
-    Epoch 1/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 10ms/step - loss: 8.4606 - mse: 8.4606 - val_loss: 1.0394 - val_mse: 1.0394
-    Epoch 2/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.7554 - mse: 0.7554 - val_loss: 0.7334 - val_mse: 0.7334
-    Epoch 3/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.5296 - mse: 0.5296 - val_loss: 0.6920 - val_mse: 0.6920
-    Epoch 4/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.5222 - mse: 0.5222 - val_loss: 0.6822 - val_mse: 0.6822
-    Epoch 5/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4696 - mse: 0.4696 - val_loss: 0.6443 - val_mse: 0.6443
-    Epoch 6/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4592 - mse: 0.4592 - val_loss: 0.6406 - val_mse: 0.6406
-    Epoch 7/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3747 - mse: 0.3747 - val_loss: 0.6065 - val_mse: 0.6065
-    Epoch 8/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.4172 - mse: 0.4172 - val_loss: 0.5762 - val_mse: 0.5762
-    Epoch 9/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4067 - mse: 0.4067 - val_loss: 0.5603 - val_mse: 0.5603
-    Epoch 10/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3680 - mse: 0.3680 - val_loss: 0.5371 - val_mse: 0.5371
-    Epoch 11/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3195 - mse: 0.3195 - val_loss: 0.5051 - val_mse: 0.5051
-    Epoch 12/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3271 - mse: 0.3271 - val_loss: 0.4913 - val_mse: 0.4913
-    Epoch 13/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3396 - mse: 0.3396 - val_loss: 0.4614 - val_mse: 0.4614
-    Epoch 14/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3112 - mse: 0.3112 - val_loss: 0.4491 - val_mse: 0.4491
-    Epoch 15/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2628 - mse: 0.2628 - val_loss: 0.4146 - val_mse: 0.4146
-    Epoch 16/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2407 - mse: 0.2407 - val_loss: 0.3836 - val_mse: 0.3836
-    Epoch 17/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2726 - mse: 0.2726 - val_loss: 0.3780 - val_mse: 0.3780
-    Epoch 18/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2105 - mse: 0.2105 - val_loss: 0.3371 - val_mse: 0.3371
-    Epoch 19/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2458 - mse: 0.2458 - val_loss: 0.3207 - val_mse: 0.3207
-    Epoch 20/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2032 - mse: 0.2032 - val_loss: 0.3040 - val_mse: 0.3040
-    Epoch 21/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1737 - mse: 0.1737 - val_loss: 0.2755 - val_mse: 0.2755
-    Epoch 22/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1808 - mse: 0.1808 - val_loss: 0.2632 - val_mse: 0.2632
-    Epoch 23/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1771 - mse: 0.1771 - val_loss: 0.2454 - val_mse: 0.2454
-    Epoch 24/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1885 - mse: 0.1885 - val_loss: 0.2282 - val_mse: 0.2282
-    Epoch 25/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1630 - mse: 0.1630 - val_loss: 0.2125 - val_mse: 0.2125
-    Epoch 26/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1595 - mse: 0.1595 - val_loss: 0.2043 - val_mse: 0.2043
-    Epoch 27/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1471 - mse: 0.1471 - val_loss: 0.1865 - val_mse: 0.1865
-    Epoch 28/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1376 - mse: 0.1376 - val_loss: 0.1709 - val_mse: 0.1709
-    Epoch 29/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1411 - mse: 0.1411 - val_loss: 0.1755 - val_mse: 0.1755
-    Epoch 30/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1143 - mse: 0.1143 - val_loss: 0.1505 - val_mse: 0.1505
-    Epoch 31/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1103 - mse: 0.1103 - val_loss: 0.1444 - val_mse: 0.1444
-    Epoch 32/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1045 - mse: 0.1045 - val_loss: 0.1289 - val_mse: 0.1289
-    Epoch 33/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1043 - mse: 0.1043 - val_loss: 0.1182 - val_mse: 0.1182
-    Epoch 34/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1025 - mse: 0.1025 - val_loss: 0.1185 - val_mse: 0.1185
-    Epoch 35/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0963 - mse: 0.0963 - val_loss: 0.1055 - val_mse: 0.1055
-    Epoch 36/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0925 - mse: 0.0925 - val_loss: 0.1066 - val_mse: 0.1066
-    Epoch 37/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0888 - mse: 0.0888 - val_loss: 0.1030 - val_mse: 0.1030
-    Epoch 38/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0889 - mse: 0.0889 - val_loss: 0.0891 - val_mse: 0.0891
-    Epoch 39/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0743 - mse: 0.0743 - val_loss: 0.0878 - val_mse: 0.0878
-    Epoch 40/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0709 - mse: 0.0709 - val_loss: 0.0834 - val_mse: 0.0834
-    Epoch 41/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0702 - mse: 0.0702 - val_loss: 0.0850 - val_mse: 0.0850
-    Epoch 42/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0612 - mse: 0.0612 - val_loss: 0.0782 - val_mse: 0.0782
-    Epoch 43/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0702 - mse: 0.0702 - val_loss: 0.0721 - val_mse: 0.0721
-    Epoch 44/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0683 - mse: 0.0683 - val_loss: 0.0693 - val_mse: 0.0693
-    Epoch 45/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0578 - mse: 0.0578 - val_loss: 0.0700 - val_mse: 0.0700
-    Epoch 46/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0659 - mse: 0.0659 - val_loss: 0.0661 - val_mse: 0.0661
-    Epoch 47/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0530 - mse: 0.0530 - val_loss: 0.0631 - val_mse: 0.0631
-    Epoch 48/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0560 - mse: 0.0560 - val_loss: 0.0587 - val_mse: 0.0587
-    Epoch 49/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0650 - mse: 0.0650 - val_loss: 0.0585 - val_mse: 0.0585
-    Epoch 50/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0554 - mse: 0.0554 - val_loss: 0.0534 - val_mse: 0.0534
-    Epoch 51/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0549 - mse: 0.0549 - val_loss: 0.0538 - val_mse: 0.0538
-    Epoch 52/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0561 - mse: 0.0561 - val_loss: 0.0510 - val_mse: 0.0510
-    Epoch 53/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0489 - mse: 0.0489 - val_loss: 0.0535 - val_mse: 0.0535
-    Epoch 54/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0519 - mse: 0.0519 - val_loss: 0.0492 - val_mse: 0.0492
-    Epoch 55/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0512 - mse: 0.0512 - val_loss: 0.0490 - val_mse: 0.0490
-    Epoch 56/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0477 - mse: 0.0477 - val_loss: 0.0456 - val_mse: 0.0456
-    Epoch 57/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0465 - mse: 0.0465 - val_loss: 0.0451 - val_mse: 0.0451
-    Epoch 58/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0477 - mse: 0.0477 - val_loss: 0.0495 - val_mse: 0.0495
-    Epoch 59/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0474 - mse: 0.0474 - val_loss: 0.0450 - val_mse: 0.0450
-    Epoch 60/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0515 - mse: 0.0515 - val_loss: 0.0446 - val_mse: 0.0446
-    Epoch 61/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0420 - mse: 0.0420 - val_loss: 0.0419 - val_mse: 0.0419
-    Epoch 62/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0441 - mse: 0.0441 - val_loss: 0.0413 - val_mse: 0.0413
-    Epoch 63/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0475 - mse: 0.0475 - val_loss: 0.0420 - val_mse: 0.0420
-    Epoch 64/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0440 - mse: 0.0440 - val_loss: 0.0415 - val_mse: 0.0415
-    Epoch 65/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0427 - mse: 0.0427 - val_loss: 0.0397 - val_mse: 0.0397
-    Epoch 66/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0418 - mse: 0.0418 - val_loss: 0.0419 - val_mse: 0.0419
-    Epoch 67/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0428 - mse: 0.0428 - val_loss: 0.0390 - val_mse: 0.0390
-    Epoch 68/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0406 - mse: 0.0406 - val_loss: 0.0401 - val_mse: 0.0401
-    Epoch 69/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0391 - mse: 0.0391 - val_loss: 0.0360 - val_mse: 0.0360
-    Epoch 70/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0393 - mse: 0.0393 - val_loss: 0.0359 - val_mse: 0.0359
-    Epoch 71/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0416 - mse: 0.0416 - val_loss: 0.0373 - val_mse: 0.0373
-    Epoch 72/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0396 - mse: 0.0396 - val_loss: 0.0359 - val_mse: 0.0359
-    Epoch 73/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0395 - mse: 0.0395 - val_loss: 0.0360 - val_mse: 0.0360
-    Epoch 74/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0379 - mse: 0.0379 - val_loss: 0.0375 - val_mse: 0.0375
-    Epoch 75/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0385 - mse: 0.0385 - val_loss: 0.0353 - val_mse: 0.0353
-    Epoch 76/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0391 - mse: 0.0391 - val_loss: 0.0348 - val_mse: 0.0348
-    Epoch 77/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0384 - mse: 0.0384 - val_loss: 0.0339 - val_mse: 0.0339
-    Epoch 78/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0377 - mse: 0.0377 - val_loss: 0.0334 - val_mse: 0.0334
-    Epoch 79/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0364 - mse: 0.0364 - val_loss: 0.0325 - val_mse: 0.0325
-    Epoch 80/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0379 - mse: 0.0379 - val_loss: 0.0331 - val_mse: 0.0331
-    Epoch 81/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0358 - mse: 0.0358 - val_loss: 0.0339 - val_mse: 0.0339
-    Epoch 82/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0355 - mse: 0.0355 - val_loss: 0.0313 - val_mse: 0.0313
-    Epoch 83/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0360 - mse: 0.0360 - val_loss: 0.0330 - val_mse: 0.0330
-    Epoch 84/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0322 - mse: 0.0322 - val_loss: 0.0313 - val_mse: 0.0313
-    Epoch 85/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0375 - mse: 0.0375 - val_loss: 0.0324 - val_mse: 0.0324
-    Epoch 86/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0364 - mse: 0.0364 - val_loss: 0.0306 - val_mse: 0.0306
-    Epoch 87/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0347 - mse: 0.0347 - val_loss: 0.0307 - val_mse: 0.0307
-    Epoch 88/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0365 - mse: 0.0365 - val_loss: 0.0317 - val_mse: 0.0317
-    Epoch 89/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0346 - mse: 0.0346 - val_loss: 0.0297 - val_mse: 0.0297
-    Epoch 90/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0340 - mse: 0.0340 - val_loss: 0.0305 - val_mse: 0.0305
-    Epoch 91/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0352 - mse: 0.0352 - val_loss: 0.0294 - val_mse: 0.0294
-    Epoch 92/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0308 - mse: 0.0308 - val_loss: 0.0292 - val_mse: 0.0292
-    Epoch 93/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0335 - mse: 0.0335 - val_loss: 0.0304 - val_mse: 0.0304
-    Epoch 94/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0313 - mse: 0.0313 - val_loss: 0.0281 - val_mse: 0.0281
-    Epoch 95/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0342 - mse: 0.0342 - val_loss: 0.0291 - val_mse: 0.0291
-    Epoch 96/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0330 - mse: 0.0330 - val_loss: 0.0288 - val_mse: 0.0288
-    Epoch 97/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0354 - mse: 0.0354 - val_loss: 0.0280 - val_mse: 0.0280
-    Epoch 98/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0370 - mse: 0.0370 - val_loss: 0.0277 - val_mse: 0.0277
-    Epoch 99/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0323 - mse: 0.0323 - val_loss: 0.0273 - val_mse: 0.0273
-    Epoch 100/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0321 - mse: 0.0321 - val_loss: 0.0264 - val_mse: 0.0264
-    sgd - tanh
-    Epoch 1/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 9ms/step - loss: 8.6218 - mse: 8.6218 - val_loss: 2.3776 - val_mse: 2.3776
-    Epoch 2/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 1.8841 - mse: 1.8841 - val_loss: 1.0923 - val_mse: 1.0923
-    Epoch 3/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 1.0179 - mse: 1.0179 - val_loss: 0.8665 - val_mse: 0.8665
-    Epoch 4/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.8521 - mse: 0.8521 - val_loss: 0.7980 - val_mse: 0.7980
-    Epoch 5/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.7518 - mse: 0.7518 - val_loss: 0.7529 - val_mse: 0.7529
-    Epoch 6/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.7244 - mse: 0.7244 - val_loss: 0.7119 - val_mse: 0.7119
-    Epoch 7/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.6084 - mse: 0.6084 - val_loss: 0.6742 - val_mse: 0.6742
-    Epoch 8/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.5708 - mse: 0.5708 - val_loss: 0.6419 - val_mse: 0.6419
-    Epoch 9/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.5197 - mse: 0.5197 - val_loss: 0.6143 - val_mse: 0.6143
-    Epoch 10/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.4683 - mse: 0.4683 - val_loss: 0.5922 - val_mse: 0.5922
-    Epoch 11/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4599 - mse: 0.4599 - val_loss: 0.5732 - val_mse: 0.5732
-    Epoch 12/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.4443 - mse: 0.4443 - val_loss: 0.5587 - val_mse: 0.5587
-    Epoch 13/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3949 - mse: 0.3949 - val_loss: 0.5468 - val_mse: 0.5468
-    Epoch 14/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3607 - mse: 0.3607 - val_loss: 0.5366 - val_mse: 0.5366
-    Epoch 15/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3608 - mse: 0.3608 - val_loss: 0.5284 - val_mse: 0.5284
-    Epoch 16/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3692 - mse: 0.3692 - val_loss: 0.5219 - val_mse: 0.5219
-    Epoch 17/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3469 - mse: 0.3469 - val_loss: 0.5153 - val_mse: 0.5153
-    Epoch 18/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3192 - mse: 0.3192 - val_loss: 0.5098 - val_mse: 0.5098
-    Epoch 19/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3448 - mse: 0.3448 - val_loss: 0.5052 - val_mse: 0.5052
-    Epoch 20/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3601 - mse: 0.3601 - val_loss: 0.5003 - val_mse: 0.5003
-    Epoch 21/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3015 - mse: 0.3015 - val_loss: 0.4964 - val_mse: 0.4964
-    Epoch 22/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3646 - mse: 0.3646 - val_loss: 0.4932 - val_mse: 0.4932
-    Epoch 23/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3291 - mse: 0.3291 - val_loss: 0.4894 - val_mse: 0.4894
-    Epoch 24/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3169 - mse: 0.3169 - val_loss: 0.4876 - val_mse: 0.4876
-    Epoch 25/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2881 - mse: 0.2881 - val_loss: 0.4843 - val_mse: 0.4843
-    Epoch 26/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2960 - mse: 0.2960 - val_loss: 0.4827 - val_mse: 0.4827
-    Epoch 27/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.3196 - mse: 0.3196 - val_loss: 0.4803 - val_mse: 0.4803
-    Epoch 28/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2806 - mse: 0.2806 - val_loss: 0.4776 - val_mse: 0.4776
-    Epoch 29/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2738 - mse: 0.2738 - val_loss: 0.4749 - val_mse: 0.4749
-    Epoch 30/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3011 - mse: 0.3011 - val_loss: 0.4738 - val_mse: 0.4738
-    Epoch 31/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2761 - mse: 0.2761 - val_loss: 0.4721 - val_mse: 0.4721
-    Epoch 32/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2523 - mse: 0.2523 - val_loss: 0.4695 - val_mse: 0.4695
-    Epoch 33/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3192 - mse: 0.3192 - val_loss: 0.4681 - val_mse: 0.4681
-    Epoch 34/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2704 - mse: 0.2704 - val_loss: 0.4665 - val_mse: 0.4665
-    Epoch 35/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2889 - mse: 0.2889 - val_loss: 0.4639 - val_mse: 0.4639
-    Epoch 36/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2832 - mse: 0.2832 - val_loss: 0.4622 - val_mse: 0.4622
-    Epoch 37/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2659 - mse: 0.2659 - val_loss: 0.4608 - val_mse: 0.4608
-    Epoch 38/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2971 - mse: 0.2971 - val_loss: 0.4592 - val_mse: 0.4592
-    Epoch 39/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2803 - mse: 0.2803 - val_loss: 0.4578 - val_mse: 0.4578
-    Epoch 40/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2762 - mse: 0.2762 - val_loss: 0.4563 - val_mse: 0.4563
-    Epoch 41/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2601 - mse: 0.2601 - val_loss: 0.4533 - val_mse: 0.4533
-    Epoch 42/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2927 - mse: 0.2927 - val_loss: 0.4520 - val_mse: 0.4520
-    Epoch 43/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3249 - mse: 0.3249 - val_loss: 0.4507 - val_mse: 0.4507
-    Epoch 44/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2685 - mse: 0.2685 - val_loss: 0.4489 - val_mse: 0.4489
-    Epoch 45/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2715 - mse: 0.2715 - val_loss: 0.4473 - val_mse: 0.4473
-    Epoch 46/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2676 - mse: 0.2676 - val_loss: 0.4436 - val_mse: 0.4436
-    Epoch 47/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2533 - mse: 0.2533 - val_loss: 0.4404 - val_mse: 0.4404
-    Epoch 48/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2362 - mse: 0.2362 - val_loss: 0.4383 - val_mse: 0.4383
-    Epoch 49/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2654 - mse: 0.2654 - val_loss: 0.4353 - val_mse: 0.4353
-    Epoch 50/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2408 - mse: 0.2408 - val_loss: 0.4324 - val_mse: 0.4324
-    Epoch 51/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2581 - mse: 0.2581 - val_loss: 0.4299 - val_mse: 0.4299
-    Epoch 52/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2073 - mse: 0.2073 - val_loss: 0.4268 - val_mse: 0.4268
-    Epoch 53/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2465 - mse: 0.2465 - val_loss: 0.4233 - val_mse: 0.4233
-    Epoch 54/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2534 - mse: 0.2534 - val_loss: 0.4210 - val_mse: 0.4210
-    Epoch 55/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2201 - mse: 0.2201 - val_loss: 0.4188 - val_mse: 0.4188
-    Epoch 56/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2593 - mse: 0.2593 - val_loss: 0.4166 - val_mse: 0.4166
-    Epoch 57/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2535 - mse: 0.2535 - val_loss: 0.4128 - val_mse: 0.4128
-    Epoch 58/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2941 - mse: 0.2941 - val_loss: 0.4108 - val_mse: 0.4108
-    Epoch 59/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2659 - mse: 0.2659 - val_loss: 0.4063 - val_mse: 0.4063
-    Epoch 60/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2339 - mse: 0.2339 - val_loss: 0.4005 - val_mse: 0.4005
-    Epoch 61/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2076 - mse: 0.2076 - val_loss: 0.3951 - val_mse: 0.3951
-    Epoch 62/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2262 - mse: 0.2262 - val_loss: 0.3902 - val_mse: 0.3902
-    Epoch 63/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2219 - mse: 0.2219 - val_loss: 0.3855 - val_mse: 0.3855
-    Epoch 64/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2480 - mse: 0.2480 - val_loss: 0.3803 - val_mse: 0.3803
-    Epoch 65/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2267 - mse: 0.2267 - val_loss: 0.3744 - val_mse: 0.3744
-    Epoch 66/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2478 - mse: 0.2478 - val_loss: 0.3686 - val_mse: 0.3686
-    Epoch 67/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2460 - mse: 0.2460 - val_loss: 0.3624 - val_mse: 0.3624
-    Epoch 68/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.2099 - mse: 0.2099 - val_loss: 0.3550 - val_mse: 0.3550
-    Epoch 69/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2248 - mse: 0.2248 - val_loss: 0.3474 - val_mse: 0.3474
-    Epoch 70/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2103 - mse: 0.2103 - val_loss: 0.3417 - val_mse: 0.3417
-    Epoch 71/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2149 - mse: 0.2149 - val_loss: 0.3332 - val_mse: 0.3332
-    Epoch 72/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2032 - mse: 0.2032 - val_loss: 0.3252 - val_mse: 0.3252
-    Epoch 73/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2126 - mse: 0.2126 - val_loss: 0.3192 - val_mse: 0.3192
-    Epoch 74/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1978 - mse: 0.1978 - val_loss: 0.3102 - val_mse: 0.3102
-    Epoch 75/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2009 - mse: 0.2009 - val_loss: 0.3029 - val_mse: 0.3029
-    Epoch 76/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1582 - mse: 0.1582 - val_loss: 0.2934 - val_mse: 0.2934
-    Epoch 77/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2031 - mse: 0.2031 - val_loss: 0.2893 - val_mse: 0.2893
-    Epoch 78/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1706 - mse: 0.1706 - val_loss: 0.2806 - val_mse: 0.2806
-    Epoch 79/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1471 - mse: 0.1471 - val_loss: 0.2698 - val_mse: 0.2698
-    Epoch 80/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1714 - mse: 0.1714 - val_loss: 0.2622 - val_mse: 0.2622
-    Epoch 81/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1960 - mse: 0.1960 - val_loss: 0.2543 - val_mse: 0.2543
-    Epoch 82/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1408 - mse: 0.1408 - val_loss: 0.2428 - val_mse: 0.2428
-    Epoch 83/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1566 - mse: 0.1566 - val_loss: 0.2393 - val_mse: 0.2393
-    Epoch 84/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1441 - mse: 0.1441 - val_loss: 0.2305 - val_mse: 0.2305
-    Epoch 85/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1458 - mse: 0.1458 - val_loss: 0.2238 - val_mse: 0.2238
-    Epoch 86/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1392 - mse: 0.1392 - val_loss: 0.2143 - val_mse: 0.2143
-    Epoch 87/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1599 - mse: 0.1599 - val_loss: 0.2072 - val_mse: 0.2072
-    Epoch 88/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1600 - mse: 0.1600 - val_loss: 0.1998 - val_mse: 0.1998
-    Epoch 89/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1370 - mse: 0.1370 - val_loss: 0.1903 - val_mse: 0.1903
-    Epoch 90/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1223 - mse: 0.1223 - val_loss: 0.1852 - val_mse: 0.1852
-    Epoch 91/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1253 - mse: 0.1253 - val_loss: 0.1829 - val_mse: 0.1829
-    Epoch 92/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.1051 - mse: 0.1051 - val_loss: 0.1708 - val_mse: 0.1708
-    Epoch 93/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1168 - mse: 0.1168 - val_loss: 0.1694 - val_mse: 0.1694
-    Epoch 94/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1065 - mse: 0.1065 - val_loss: 0.1606 - val_mse: 0.1606
-    Epoch 95/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1044 - mse: 0.1044 - val_loss: 0.1570 - val_mse: 0.1570
-    Epoch 96/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1150 - mse: 0.1150 - val_loss: 0.1539 - val_mse: 0.1539
-    Epoch 97/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 3ms/step - loss: 0.0987 - mse: 0.0987 - val_loss: 0.1463 - val_mse: 0.1463
-    Epoch 98/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1002 - mse: 0.1002 - val_loss: 0.1455 - val_mse: 0.1455
-    Epoch 99/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0985 - mse: 0.0985 - val_loss: 0.1402 - val_mse: 0.1402
-    Epoch 100/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.0977 - mse: 0.0977 - val_loss: 0.1333 - val_mse: 0.1333
-    lion - tanh
-    Epoch 1/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 9ms/step - loss: 12.3075 - mse: 12.3075 - val_loss: 11.2792 - val_mse: 11.2792
-    Epoch 2/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 11.3172 - mse: 11.3172 - val_loss: 10.2987 - val_mse: 10.2987
-    Epoch 3/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 9.6407 - mse: 9.6407 - val_loss: 9.3154 - val_mse: 9.3154
-    Epoch 4/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 9.0630 - mse: 9.0630 - val_loss: 8.3143 - val_mse: 8.3143
-    Epoch 5/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 7.6832 - mse: 7.6832 - val_loss: 7.2965 - val_mse: 7.2965
-    Epoch 6/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 7.0301 - mse: 7.0301 - val_loss: 6.2932 - val_mse: 6.2932
-    Epoch 7/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 6.1704 - mse: 6.1704 - val_loss: 5.3297 - val_mse: 5.3297
-    Epoch 8/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 5.1956 - mse: 5.1956 - val_loss: 4.4324 - val_mse: 4.4324
-    Epoch 9/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 4.1960 - mse: 4.1960 - val_loss: 3.6185 - val_mse: 3.6185
-    Epoch 10/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 3.3015 - mse: 3.3015 - val_loss: 2.8559 - val_mse: 2.8559
-    Epoch 11/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 2.4871 - mse: 2.4871 - val_loss: 2.1314 - val_mse: 2.1314
-    Epoch 12/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 1.7989 - mse: 1.7989 - val_loss: 1.5223 - val_mse: 1.5223
-    Epoch 13/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 1.2214 - mse: 1.2214 - val_loss: 1.0642 - val_mse: 1.0642
-    Epoch 14/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.7732 - mse: 0.7732 - val_loss: 0.7899 - val_mse: 0.7899
-    Epoch 15/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.5404 - mse: 0.5404 - val_loss: 0.7301 - val_mse: 0.7301
-    Epoch 16/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.6232 - mse: 0.6232 - val_loss: 0.9183 - val_mse: 0.9183
-    Epoch 17/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.8326 - mse: 0.8326 - val_loss: 1.3790 - val_mse: 1.3790
-    Epoch 18/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 1.2120 - mse: 1.2120 - val_loss: 1.9630 - val_mse: 1.9630
-    Epoch 19/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 1.6245 - mse: 1.6245 - val_loss: 1.8634 - val_mse: 1.8634
-    Epoch 20/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 1.4087 - mse: 1.4087 - val_loss: 1.2725 - val_mse: 1.2725
-    Epoch 21/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.8489 - mse: 0.8489 - val_loss: 0.8673 - val_mse: 0.8673
-    Epoch 22/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.5147 - mse: 0.5147 - val_loss: 0.7108 - val_mse: 0.7108
-    Epoch 23/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.5145 - mse: 0.5145 - val_loss: 0.7766 - val_mse: 0.7766
-    Epoch 24/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.6038 - mse: 0.6038 - val_loss: 0.9147 - val_mse: 0.9147
-    Epoch 25/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.7195 - mse: 0.7195 - val_loss: 0.8557 - val_mse: 0.8557
-    Epoch 26/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.6322 - mse: 0.6322 - val_loss: 0.6933 - val_mse: 0.6933
-    Epoch 27/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.4608 - mse: 0.4608 - val_loss: 0.6548 - val_mse: 0.6548
-    Epoch 28/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4439 - mse: 0.4439 - val_loss: 0.6848 - val_mse: 0.6848
-    Epoch 29/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4830 - mse: 0.4830 - val_loss: 0.6596 - val_mse: 0.6596
-    Epoch 30/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4493 - mse: 0.4493 - val_loss: 0.6084 - val_mse: 0.6084
-    Epoch 31/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4309 - mse: 0.4309 - val_loss: 0.5918 - val_mse: 0.5918
-    Epoch 32/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4137 - mse: 0.4137 - val_loss: 0.5833 - val_mse: 0.5833
-    Epoch 33/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4393 - mse: 0.4393 - val_loss: 0.5786 - val_mse: 0.5786
-    Epoch 34/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.4002 - mse: 0.4002 - val_loss: 0.5682 - val_mse: 0.5682
-    Epoch 35/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3680 - mse: 0.3680 - val_loss: 0.5483 - val_mse: 0.5483
-    Epoch 36/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3256 - mse: 0.3256 - val_loss: 0.5298 - val_mse: 0.5298
-    Epoch 37/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.3779 - mse: 0.3779 - val_loss: 0.5093 - val_mse: 0.5093
-    Epoch 38/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3626 - mse: 0.3626 - val_loss: 0.4935 - val_mse: 0.4935
-    Epoch 39/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3412 - mse: 0.3412 - val_loss: 0.4820 - val_mse: 0.4820
-    Epoch 40/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.3034 - mse: 0.3034 - val_loss: 0.4704 - val_mse: 0.4704
-    Epoch 41/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2882 - mse: 0.2882 - val_loss: 0.4495 - val_mse: 0.4495
-    Epoch 42/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2633 - mse: 0.2633 - val_loss: 0.4300 - val_mse: 0.4300
-    Epoch 43/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.2920 - mse: 0.2920 - val_loss: 0.4124 - val_mse: 0.4124
-    Epoch 44/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.2735 - mse: 0.2735 - val_loss: 0.3977 - val_mse: 0.3977
-    Epoch 45/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2489 - mse: 0.2489 - val_loss: 0.3822 - val_mse: 0.3822
-    Epoch 46/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2551 - mse: 0.2551 - val_loss: 0.3654 - val_mse: 0.3654
-    Epoch 47/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2567 - mse: 0.2567 - val_loss: 0.3544 - val_mse: 0.3544
-    Epoch 48/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2670 - mse: 0.2670 - val_loss: 0.3380 - val_mse: 0.3380
-    Epoch 49/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2098 - mse: 0.2098 - val_loss: 0.3214 - val_mse: 0.3214
-    Epoch 50/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2105 - mse: 0.2105 - val_loss: 0.3012 - val_mse: 0.3012
-    Epoch 51/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2104 - mse: 0.2104 - val_loss: 0.2858 - val_mse: 0.2858
-    Epoch 52/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1929 - mse: 0.1929 - val_loss: 0.2680 - val_mse: 0.2680
-    Epoch 53/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.2075 - mse: 0.2075 - val_loss: 0.2520 - val_mse: 0.2520
-    Epoch 54/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.1934 - mse: 0.1934 - val_loss: 0.2397 - val_mse: 0.2397
-    Epoch 55/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.1818 - mse: 0.1818 - val_loss: 0.2238 - val_mse: 0.2238
-    Epoch 56/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1688 - mse: 0.1688 - val_loss: 0.2098 - val_mse: 0.2098
-    Epoch 57/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.1613 - mse: 0.1613 - val_loss: 0.1958 - val_mse: 0.1958
-    Epoch 58/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.1651 - mse: 0.1651 - val_loss: 0.1858 - val_mse: 0.1858
-    Epoch 59/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1436 - mse: 0.1436 - val_loss: 0.1724 - val_mse: 0.1724
-    Epoch 60/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1273 - mse: 0.1273 - val_loss: 0.1591 - val_mse: 0.1591
-    Epoch 61/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1293 - mse: 0.1293 - val_loss: 0.1477 - val_mse: 0.1477
-    Epoch 62/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1182 - mse: 0.1182 - val_loss: 0.1352 - val_mse: 0.1352
-    Epoch 63/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1128 - mse: 0.1128 - val_loss: 0.1254 - val_mse: 0.1254
-    Epoch 64/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0935 - mse: 0.0935 - val_loss: 0.1141 - val_mse: 0.1141
-    Epoch 65/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.1016 - mse: 0.1016 - val_loss: 0.1064 - val_mse: 0.1064
-    Epoch 66/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0868 - mse: 0.0868 - val_loss: 0.0969 - val_mse: 0.0969
-    Epoch 67/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0823 - mse: 0.0823 - val_loss: 0.0888 - val_mse: 0.0888
-    Epoch 68/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0707 - mse: 0.0707 - val_loss: 0.0814 - val_mse: 0.0814
-    Epoch 69/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0603 - mse: 0.0603 - val_loss: 0.0713 - val_mse: 0.0713
-    Epoch 70/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0579 - mse: 0.0579 - val_loss: 0.0651 - val_mse: 0.0651
-    Epoch 71/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0545 - mse: 0.0545 - val_loss: 0.0569 - val_mse: 0.0569
-    Epoch 72/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0407 - mse: 0.0407 - val_loss: 0.0505 - val_mse: 0.0505
-    Epoch 73/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0388 - mse: 0.0388 - val_loss: 0.0451 - val_mse: 0.0451
-    Epoch 74/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0344 - mse: 0.0344 - val_loss: 0.0380 - val_mse: 0.0380
-    Epoch 75/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.0307 - mse: 0.0307 - val_loss: 0.0316 - val_mse: 0.0316
-    Epoch 76/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0321 - mse: 0.0321 - val_loss: 0.0308 - val_mse: 0.0308
-    Epoch 77/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0213 - mse: 0.0213 - val_loss: 0.0234 - val_mse: 0.0234
-    Epoch 78/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0201 - mse: 0.0201 - val_loss: 0.0187 - val_mse: 0.0187
-    Epoch 79/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0199 - mse: 0.0199 - val_loss: 0.0181 - val_mse: 0.0181
-    Epoch 80/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0174 - mse: 0.0174 - val_loss: 0.0158 - val_mse: 0.0158
-    Epoch 81/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0150 - mse: 0.0150 - val_loss: 0.0145 - val_mse: 0.0145
-    Epoch 82/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0167 - mse: 0.0167 - val_loss: 0.0158 - val_mse: 0.0158
-    Epoch 83/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0155 - mse: 0.0155 - val_loss: 0.0201 - val_mse: 0.0201
-    Epoch 84/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0181 - mse: 0.0181 - val_loss: 0.0199 - val_mse: 0.0199
-    Epoch 85/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.0187 - mse: 0.0187 - val_loss: 0.0223 - val_mse: 0.0223
-    Epoch 86/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0204 - mse: 0.0204 - val_loss: 0.0230 - val_mse: 0.0230
-    Epoch 87/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0213 - mse: 0.0213 - val_loss: 0.0230 - val_mse: 0.0230
-    Epoch 88/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0180 - mse: 0.0180 - val_loss: 0.0200 - val_mse: 0.0200
-    Epoch 89/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step - loss: 0.0174 - mse: 0.0174 - val_loss: 0.0175 - val_mse: 0.0175
-    Epoch 90/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0156 - mse: 0.0156 - val_loss: 0.0183 - val_mse: 0.0183
-    Epoch 91/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0150 - mse: 0.0150 - val_loss: 0.0135 - val_mse: 0.0135
-    Epoch 92/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0147 - mse: 0.0147 - val_loss: 0.0160 - val_mse: 0.0160
-    Epoch 93/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0139 - mse: 0.0139 - val_loss: 0.0143 - val_mse: 0.0143
-    Epoch 94/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0145 - mse: 0.0145 - val_loss: 0.0129 - val_mse: 0.0129
-    Epoch 95/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0149 - mse: 0.0149 - val_loss: 0.0143 - val_mse: 0.0143
-    Epoch 96/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0165 - mse: 0.0165 - val_loss: 0.0175 - val_mse: 0.0175
-    Epoch 97/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0159 - mse: 0.0159 - val_loss: 0.0127 - val_mse: 0.0127
-    Epoch 98/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0150 - mse: 0.0150 - val_loss: 0.0134 - val_mse: 0.0134
-    Epoch 99/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0140 - mse: 0.0140 - val_loss: 0.0163 - val_mse: 0.0163
-    Epoch 100/100
-    [1m16/16[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 4ms/step - loss: 0.0147 - mse: 0.0147 - val_loss: 0.0169 - val_mse: 0.0169
+    		sgd - relu
+    		sgd - tanh
+    		lion - tanh
 
 
 
 ```python
+plt.figure(figsize=(15,3))
+plt.title('validation loss inside training range')
 plt.plot(hist_msr.history['val_loss'], label='sgd-relu')
 plt.plot(hist_mst.history['val_loss'], label='sgd-tanh')
 plt.plot(hist_mlt.history['val_loss'], label='lion-tanh')
@@ -2169,9 +1658,9 @@ plt.show()
 
 ```
 
-    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 8ms/step 
-    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 8ms/step 
-    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 5ms/step 
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 15ms/step
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 13ms/step
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 12ms/step
 
 
 
@@ -2180,10 +1669,37 @@ plt.show()
     
 
 
-metti plot con la loss su questo intervallo a last epochs 
+
+```python
+print('sgd - relu')
+ev_msr = msgdr.evaluate(x_pred, pol(x_pred), batch_size=32)
+print('sgd - tanh')
+ev_mst = msgdt.evaluate(x_pred, pol(x_pred), batch_size=32)
+print('lion - tanh')
+ev_mlt = mliot.evaluate(x_pred, pol(x_pred), batch_size=32)
+
+```
+
+    sgd - relu
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 7ms/step - loss: 55.1478 - mse: 55.1478   
+    sgd - tanh
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 7ms/step - loss: 62.6527 - mse: 62.6527   
+    lion - tanh
+    [1m4/4[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 7ms/step - loss: 37.3917 - mse: 37.3917 
+
+
+All 3 models didn't perform well on the new region of data.
 
 # Exercise 11.3
 
+I tested different architectures varying the values of sigma.
+
+The model that perform better were the one with an higher number of parameters.
+
+The other tested model can be found in the appendix.
+
+
+## Data generation
 
 
 ```python
@@ -2199,10 +1715,6 @@ from tqdm import tqdm
 import pandas as pd
 
 ```
-
-    2025-10-09 11:53:38.416723: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
-    To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-
 
 
 ```python
@@ -2229,6 +1741,8 @@ def gen_sinxy(nval=10000, ntrain=10000, sigma:float=0.01):
 
 
 ```
+
+## Model definition
 
 
 ```python
@@ -2300,6 +1814,8 @@ def fitsin(neurs:list, opt:str, epochs:int=100, sigma:float = 0.):
     return mod, hist
 ```
 
+## Performance visualization
+
 
 ```python
 from matplotlib.gridspec import GridSpec
@@ -2350,7 +1866,702 @@ def plot_mod_perf(mod, hist):
 
 ```
 
-Example of code:
+### values for sigma 0.01
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy()
+```
+
+
+```python
+X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
+
+fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
+ax[0].plot_surface(X, Y, f(X, Y))
+
+ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
+ax[1].legend()
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](Readme_files/Readme_87_0.png)
+    
+
+
+
+```python
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+```
+
+
+```python
+mod16x16, hist16x16 =fitsin([16,16], 'sgd')
+plot_mod_perf(mod16x16, hist16x16)
+```
+
+
+    
+![png](Readme_files/Readme_89_0.png)
+    
+
+
+### values for sigma = 0.1
+
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.1)
+```
+
+
+```python
+X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
+
+fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
+ax[0].plot_surface(X, Y, f(X, Y))
+
+ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
+ax[1].legend()
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](Readme_files/Readme_92_0.png)
+    
+
+
+
+```python
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+```
+
+
+```python
+mod16x16_s01, hist16x16_s01 =fitsin([16,16], 'sgd')
+plot_mod_perf(mod16x16_s01, hist16x16_s01)
+
+```
+
+
+    
+![png](Readme_files/Readme_94_0.png)
+    
+
+
+### values for sigma = 0.5
+
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.5)
+```
+
+
+```python
+X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
+
+fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
+ax[0].plot_surface(X, Y, f(X, Y))
+
+ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'training')
+ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
+ax[1].legend()
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](Readme_files/Readme_97_0.png)
+    
+
+
+
+```python
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+```
+
+
+```python
+mod16x16_s05, hist16x16_s05 =fitsin([16,16], 'sgd')
+plot_mod_perf(mod16x16_s05, hist16x16_s05)
+```
+
+
+    
+![png](Readme_files/Readme_99_0.png)
+    
+
+
+### values for sigma = 1
+
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=1)
+```
+
+
+```python
+X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
+
+fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
+ax[0].plot_surface(X, Y, f(X, Y))
+
+ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
+ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
+ax[1].legend()
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](Readme_files/Readme_102_0.png)
+    
+
+
+
+```python
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+```
+
+
+```python
+mod16x16_s1, hist16x16_s1 =fitsin([16,16], 'sgd')
+plot_mod_perf(mod16x16_s1, hist16x16_s1)
+
+```
+
+
+    
+![png](Readme_files/Readme_104_0.png)
+    
+
+
+## Appendix
+
+### Sigma 0.001
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.001)
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+
+mod2x4, hist2x4 = fitsin([2,4], 'sgd')
+mod4x2, hist4x2 = fitsin([4, 2], 'sgd')
+mod4x4, hist4x4 = fitsin([4, 4], 'sgd')
+mod4x8, hist4x8 = fitsin([4, 8], 'sgd')
+mod8x4, hist8x4 = fitsin([8, 4], 'sgd')
+mod8x8, hist8x8 = fitsin([8, 8], 'sgd')
+mod8x16, hist8x16 = fitsin([8, 16], 'sgd')
+mod16x8, hist16x8 = fitsin([16, 8], 'sgd')
+```
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential"</span>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ dense (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                   │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_1 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_2 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
+</pre>
+
+
+
+
+```python
+plot_mod_perf(mod2x4,   hist2x4) 
+plot_mod_perf(mod4x2,   hist4x2) 
+plot_mod_perf(mod4x4,   hist4x4) 
+plot_mod_perf(mod4x8,   hist4x8) 
+plot_mod_perf(mod8x4,   hist8x4)
+plot_mod_perf(mod8x8,   hist8x8) 
+plot_mod_perf(mod8x16,  hist8x16) 
+plot_mod_perf(mod16x8,  hist8x16)
+plot_mod_perf(mod16x16, hist16x16)
+```
+
+
+    
+![png](Readme_files/Readme_107_0.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_1.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_2.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_3.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_4.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_5.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_6.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_7.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_107_8.png)
+    
+
+
+### sigma 0.1
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.1)
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+
+mod2x4_s01, hist2x4_s01 = fitsin([2,4], 'sgd')
+mod4x2_s01, hist4x2_s01 = fitsin([4, 2], 'sgd')
+mod4x4_s01, hist4x4_s01 = fitsin([4, 4], 'sgd')
+mod4x8_s01, hist4x8_s01 = fitsin([4, 8], 'sgd')
+mod8x4_s01, hist8x4_s01 = fitsin([8, 4], 'sgd')
+mod8x8_s01, hist8x8_s01 = fitsin([8, 8], 'sgd')
+mod8x16_s01, hist8x16_s01 = fitsin([8, 16], 'sgd')
+mod16x8_s01, hist16x8_s01 = fitsin([16, 8], 'sgd')
+mod16x16_s01, hist16x16_s01 =fitsin([16,16], 'sgd')
+```
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_10"</span>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ dense_30 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_31 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">10</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_32 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">3</span> │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
+</pre>
+
+
+
+
+```python
+plot_mod_perf(mod2x4_s01,   hist2x4_s01) 
+plot_mod_perf(mod4x2_s01,   hist4x2_s01) 
+plot_mod_perf(mod4x4_s01,   hist4x4_s01) 
+plot_mod_perf(mod4x8_s01,   hist4x8_s01) 
+plot_mod_perf(mod8x4_s01,   hist8x4_s01)
+plot_mod_perf(mod8x8_s01,   hist8x8_s01) 
+plot_mod_perf(mod8x16_s01,  hist8x16_s01) 
+plot_mod_perf(mod16x8_s01,  hist8x16_s01)
+plot_mod_perf(mod16x16_s01, hist16x16_s01)
+```
+
+
+    
+![png](Readme_files/Readme_110_0.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_1.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_2.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_3.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_4.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_5.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_6.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_7.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_110_8.png)
+    
+
+
+### sigma 0.5
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.5)
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+
+mod2x4_s05, hist2x4_s05 = fitsin([2,4], 'sgd')
+mod4x2_s05, hist4x2_s05 = fitsin([4, 2], 'sgd')
+mod4x4_s05, hist4x4_s05 = fitsin([4, 4], 'sgd')
+mod4x8_s05, hist4x8_s05 = fitsin([4, 8], 'sgd')
+mod8x4_s05, hist8x4_s05 = fitsin([8, 4], 'sgd')
+mod8x8_s05, hist8x8_s05 = fitsin([8, 8], 'sgd')
+mod8x16_s05, hist8x16_s05 = fitsin([8, 16], 'sgd')
+mod16x8_s05, hist16x8_s05 = fitsin([16, 8], 'sgd')
+mod16x16_s05, hist16x16_s05 =fitsin([16,16], 'sgd')
+
+
+```
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_18"</span>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ dense_54 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_55 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_56 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
+</pre>
+
+
+
+
+```python
+plot_mod_perf(mod2x4_s05,   hist2x4_s05) 
+plot_mod_perf(mod4x2_s05,   hist4x2_s05) 
+plot_mod_perf(mod4x4_s05,   hist4x4_s05) 
+plot_mod_perf(mod4x8_s05,   hist4x8_s05) 
+plot_mod_perf(mod8x4_s05,   hist8x4_s05)
+plot_mod_perf(mod8x8_s05,   hist8x8_s05) 
+plot_mod_perf(mod8x16_s05,  hist8x16_s05) 
+plot_mod_perf(mod16x8_s05,  hist8x16_s05)
+plot_mod_perf(mod16x16_s05, hist16x16_s05)
+```
+
+
+    
+![png](Readme_files/Readme_113_0.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_1.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_2.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_3.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_4.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_5.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_6.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_7.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_113_8.png)
+    
+
+
+
+```python
+
+```
+
+### Sigma 1
+
+
+```python
+(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=1)
+Xtrain = np.column_stack((x_train, y_train))
+Xvalid = np.column_stack((x_valid, y_valid))
+
+mod2x4_s1, hist2x4_s1 = fitsin([2,4], 'sgd')
+mod4x2_s1, hist4x2_s1 = fitsin([4, 2], 'sgd')
+mod4x4_s1, hist4x4_s1 = fitsin([4, 4], 'sgd')
+mod4x8_s1, hist4x8_s1 = fitsin([4, 8], 'sgd')
+mod8x4_s1, hist8x4_s1 = fitsin([8, 4], 'sgd')
+mod8x8_s1, hist8x8_s1 = fitsin([8, 8], 'sgd')
+mod8x16_s1, hist8x16_s1 = fitsin([8, 16], 'sgd')
+mod16x8_s1, hist16x8_s1 = fitsin([16, 8], 'sgd')
+mod16x16_s1, hist16x16_s1 =fitsin([16,16], 'sgd')
+```
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_27"</span>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ dense_81 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_82 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_83 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
+</pre>
+
+
+
+
+```python
+plot_mod_perf(mod2x4_s1,   hist2x4_s1) 
+plot_mod_perf(mod4x2_s1,   hist4x2_s1) 
+plot_mod_perf(mod4x4_s1,   hist4x4_s1) 
+plot_mod_perf(mod4x8_s1,   hist4x8_s1) 
+plot_mod_perf(mod8x4_s1,   hist8x4_s1)
+plot_mod_perf(mod8x8_s1,   hist8x8_s1) 
+plot_mod_perf(mod8x16_s1,  hist8x16_s1) 
+plot_mod_perf(mod16x8_s1,  hist8x16_s1)
+plot_mod_perf(mod16x16_s1, hist16x16_s1)
+```
+
+
+    
+![png](Readme_files/Readme_117_0.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_1.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_2.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_3.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_4.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_5.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_6.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_7.png)
+    
+
+
+
+    
+![png](Readme_files/Readme_117_8.png)
+    
+
+
+### Arch testing
+
+Example of code to test different architectures:
 ```python
 archs = {
     '2x4':{},'4x2':{},'4x4':{},'4x8':{},
@@ -2533,1991 +2744,5 @@ plotperf(archs)
 
     NameError: name 'archs' is not defined
 
-
-### Valori per sigma 0.01
-
-
-```python
-(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy()
-```
-
-
-```python
-X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
-
-fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
-ax[0].plot_surface(X, Y, f(X, Y))
-
-ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
-ax[1].legend()
-plt.tight_layout()
-plt.show()
-```
-
-
-    
-![png](Readme_files/Readme_88_0.png)
-    
-
-
-
-```python
-Xtrain = np.column_stack((x_train, y_train))
-Xvalid = np.column_stack((x_valid, y_valid))
-```
-
-
-```python
-mod2x4, hist2x4 = fitsin([2,4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                   │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_1 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_2 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x2, hist4x2 = fitsin([4, 2], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_1"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_3 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_4 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">10</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_5 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">3</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x4, hist4x4 = fitsin([4, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_2"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_6 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_7 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">20</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_8 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x8, hist4x8 = fitsin([4, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_3"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_9 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                 │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_10 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">40</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_11 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x4, hist8x4 = fitsin([8, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_4"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_12 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_13 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">36</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_14 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x8, hist8x8 = fitsin([8, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_5"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_15 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_16 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">72</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_17 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x16, hist8x16 = fitsin([8, 16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_6"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_18 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_19 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">144</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_20 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x8, hist16x8 = fitsin([16, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_7"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_21 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_22 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │           <span style="color: #00af00; text-decoration-color: #00af00">136</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_23 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x16, hist16x16 =fitsin([16,16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_8"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_24 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_25 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">272</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_26 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-plot_mod_perf(mod2x4,   hist2x4) 
-plot_mod_perf(mod4x2,   hist4x2) 
-plot_mod_perf(mod4x4,   hist4x4) 
-plot_mod_perf(mod4x8,   hist4x8) 
-plot_mod_perf(mod8x4,   hist8x4)
-plot_mod_perf(mod8x8,   hist8x8) 
-plot_mod_perf(mod8x16,  hist8x16) 
-plot_mod_perf(mod16x8,  hist8x16)
-plot_mod_perf(mod16x16, hist16x16)
-```
-
-
-    
-![png](Readme_files/Readme_99_0.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_1.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_2.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_3.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_4.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_5.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_6.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_7.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_99_8.png)
-    
-
-
-fai lo stesso plot ma con colonne  a diversi val di sigma x diversi ottimizzatori
-
-
-
-### Valori per sigma = 0.1
-
-
-
-```python
-(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.1)
-```
-
-
-```python
-X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
-
-fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
-ax[0].plot_surface(X, Y, f(X, Y))
-
-ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
-ax[1].legend()
-plt.tight_layout()
-plt.show()
-```
-
-
-    
-![png](Readme_files/Readme_103_0.png)
-    
-
-
-
-```python
-Xtrain = np.column_stack((x_train, y_train))
-Xvalid = np.column_stack((x_valid, y_valid))
-```
-
-
-```python
-
-```
-
-
-```python
-mod2x4_s01, hist2x4_s01 = fitsin([2,4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_9"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_27 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_28 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_29 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x2_s01, hist4x2_s01 = fitsin([4, 2], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_10"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_30 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_31 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">10</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_32 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">3</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x4_s01, hist4x4_s01 = fitsin([4, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_11"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_33 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_34 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">20</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_35 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x8_s01, hist4x8_s01 = fitsin([4, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_12"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_36 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_37 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">40</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_38 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x4_s01, hist8x4_s01 = fitsin([8, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_13"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_39 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_40 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">36</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_41 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x8_s01, hist8x8_s01 = fitsin([8, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_14"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_42 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_43 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">72</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_44 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x16_s01, hist8x16_s01 = fitsin([8, 16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_15"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_45 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_46 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">144</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_47 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x8_s01, hist16x8_s01 = fitsin([16, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_16"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_48 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_49 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │           <span style="color: #00af00; text-decoration-color: #00af00">136</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_50 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x16_s01, hist16x16_s01 =fitsin([16,16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_17"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_51 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_52 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">272</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_53 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-plot_mod_perf(mod2x4_s01,   hist2x4_s01) 
-plot_mod_perf(mod4x2_s01,   hist4x2_s01) 
-plot_mod_perf(mod4x4_s01,   hist4x4_s01) 
-plot_mod_perf(mod4x8_s01,   hist4x8_s01) 
-plot_mod_perf(mod8x4_s01,   hist8x4_s01)
-plot_mod_perf(mod8x8_s01,   hist8x8_s01) 
-plot_mod_perf(mod8x16_s01,  hist8x16_s01) 
-plot_mod_perf(mod16x8_s01,  hist8x16_s01)
-plot_mod_perf(mod16x16_s01, hist16x16_s01)
-```
-
-
-    
-![png](Readme_files/Readme_115_0.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_1.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_2.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_3.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_4.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_5.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_6.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_7.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_115_8.png)
-    
-
-
-
-```python
-
-```
-
-### Valori per sigma = 0.5
-
-
-
-```python
-(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=0.5)
-```
-
-
-```python
-X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
-
-fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
-ax[0].plot_surface(X, Y, f(X, Y))
-
-ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'training')
-ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
-ax[1].legend()
-plt.tight_layout()
-plt.show()
-```
-
-
-    
-![png](Readme_files/Readme_119_0.png)
-    
-
-
-
-```python
-Xtrain = np.column_stack((x_train, y_train))
-Xvalid = np.column_stack((x_valid, y_valid))
-```
-
-
-```python
-
-```
-
-
-```python
-mod2x4_s05, hist2x4_s05 = fitsin([2,4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_18"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_54 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_55 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_56 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x2_s05, hist4x2_s05 = fitsin([4, 2], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_19"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_57 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_58 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">10</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_59 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">3</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x4_s05, hist4x4_s05 = fitsin([4, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_20"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_60 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_61 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">20</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_62 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x8_s05, hist4x8_s05 = fitsin([4, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_21"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_63 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_64 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">40</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_65 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x4_s05, hist8x4_s05 = fitsin([8, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_22"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_66 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_67 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">36</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_68 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x8_s05, hist8x8_s05 = fitsin([8, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_23"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_69 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_70 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">72</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_71 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x16_s05, hist8x16_s05 = fitsin([8, 16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_24"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_72 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_73 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">144</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_74 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x8_s05, hist16x8_s05 = fitsin([16, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_25"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_75 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_76 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │           <span style="color: #00af00; text-decoration-color: #00af00">136</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_77 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x16_s05, hist16x16_s05 =fitsin([16,16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_26"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_78 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_79 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">272</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_80 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-plot_mod_perf(mod2x4_s05,   hist2x4_s05) 
-plot_mod_perf(mod4x2_s05,   hist4x2_s05) 
-plot_mod_perf(mod4x4_s05,   hist4x4_s05) 
-plot_mod_perf(mod4x8_s05,   hist4x8_s05) 
-plot_mod_perf(mod8x4_s05,   hist8x4_s05)
-plot_mod_perf(mod8x8_s05,   hist8x8_s05) 
-plot_mod_perf(mod8x16_s05,  hist8x16_s05) 
-plot_mod_perf(mod16x8_s05,  hist8x16_s05)
-plot_mod_perf(mod16x16_s05, hist16x16_s05)
-```
-
-
-    
-![png](Readme_files/Readme_131_0.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_1.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_2.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_3.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_4.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_5.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_6.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_7.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_131_8.png)
-    
-
-
-
-```python
-
-```
-
-### Valori per sigma = 1
-
-
-
-```python
-(x_train, y_train, z_train), (x_valid, y_valid, (z_valid, z_target)) = gen_sinxy(sigma=1)
-```
-
-
-```python
-X, Y = np.meshgrid(np.linspace(-3./2., 3./2., 1000), np.linspace(-3./2., 3./2., 1000))
-
-fig, ax = plt.subplots(1, 2,subplot_kw={"projection": "3d"}, figsize=(8, 3))
-ax[0].plot_surface(X, Y, f(X, Y))
-
-ax[1].scatter(x_train, y_train, z_train,  alpha= 0.3, c='C3', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_valid,  alpha= 1.0, c='C2', label = 'validation')
-ax[1].scatter(x_valid, y_valid, z_target, alpha= 1.0, c='C4', label = 'target')
-ax[1].legend()
-plt.tight_layout()
-plt.show()
-```
-
-
-    
-![png](Readme_files/Readme_135_0.png)
-    
-
-
-
-```python
-Xtrain = np.column_stack((x_train, y_train))
-Xvalid = np.column_stack((x_valid, y_valid))
-```
-
-
-```python
-
-```
-
-
-```python
-mod2x4_s1, hist2x4_s1 = fitsin([2,4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_27"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_81 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">6</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_82 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_83 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">23</span> (92.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x2_s1, hist4x2_s1 = fitsin([4, 2], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_28"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_84 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_85 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">2</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">10</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_86 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">3</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">25</span> (100.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x4_s1, hist4x4_s1 = fitsin([4, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_29"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_87 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_88 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">20</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_89 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">37</span> (148.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod4x8_s1, hist4x8_s1 = fitsin([4, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_30"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_90 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">12</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_91 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">40</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_92 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">61</span> (244.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x4_s1, hist8x4_s1 = fitsin([8, 4], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_31"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_93 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_94 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">4</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">36</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_95 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">5</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">65</span> (260.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x8_s1, hist8x8_s1 = fitsin([8, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_32"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_96 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_97 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">72</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_98 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">105</span> (420.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod8x16_s1, hist8x16_s1 = fitsin([8, 16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_33"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_99 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)                │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">24</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_100 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">144</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_101 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">185</span> (740.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x8_s1, hist16x8_s1 = fitsin([16, 8], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_35"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_105 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_106 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">8</span>)              │           <span style="color: #00af00; text-decoration-color: #00af00">136</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_107 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │             <span style="color: #00af00; text-decoration-color: #00af00">9</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">193</span> (772.00 B)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-mod16x16_s1, hist16x16_s1 =fitsin([16,16], 'sgd')
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Model: "sequential_36"</span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃<span style="font-weight: bold"> Layer (type)                    </span>┃<span style="font-weight: bold"> Output Shape           </span>┃<span style="font-weight: bold">       Param # </span>┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ dense_108 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │            <span style="color: #00af00; text-decoration-color: #00af00">48</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_109 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">16</span>)             │           <span style="color: #00af00; text-decoration-color: #00af00">272</span> │
-├─────────────────────────────────┼────────────────────────┼───────────────┤
-│ dense_110 (<span style="color: #0087ff; text-decoration-color: #0087ff">Dense</span>)               │ (<span style="color: #00d7ff; text-decoration-color: #00d7ff">None</span>, <span style="color: #00af00; text-decoration-color: #00af00">1</span>)              │            <span style="color: #00af00; text-decoration-color: #00af00">17</span> │
-└─────────────────────────────────┴────────────────────────┴───────────────┘
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Total params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">337</span> (1.32 KB)
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold"> Non-trainable params: </span><span style="color: #00af00; text-decoration-color: #00af00">0</span> (0.00 B)
-</pre>
-
-
-
-
-```python
-plot_mod_perf(mod2x4_s1,   hist2x4_s1) 
-plot_mod_perf(mod4x2_s1,   hist4x2_s1) 
-plot_mod_perf(mod4x4_s1,   hist4x4_s1) 
-plot_mod_perf(mod4x8_s1,   hist4x8_s1) 
-plot_mod_perf(mod8x4_s1,   hist8x4_s1)
-plot_mod_perf(mod8x8_s1,   hist8x8_s1) 
-plot_mod_perf(mod8x16_s1,  hist8x16_s1) 
-plot_mod_perf(mod16x8_s1,  hist8x16_s1)
-plot_mod_perf(mod16x16_s1, hist16x16_s1)
-```
-
-
-    
-![png](Readme_files/Readme_147_0.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_1.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_2.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_3.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_4.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_5.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_6.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_7.png)
-    
-
-
-
-    
-![png](Readme_files/Readme_147_8.png)
-    
-
-
-Mettere tutti i grafici non best in un appendice in fondo al notebook
 
 

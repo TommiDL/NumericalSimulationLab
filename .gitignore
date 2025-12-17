@@ -1,2 +1,13 @@
 *.tgz
 *.zip
+*.txt
+*.xyz
+._*
+*/*.pdf
+#*.dat
+*/*.o
+introduzione_es/
+*/.ipynb_checkpoints/*
+*/.clangd
+*.gch
+

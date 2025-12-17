@@ -1,0 +1,11 @@
+COORD_FILE              cap_prov_ita.dat
+PROB_INVERSION          0.1
+PROB_PERMUTATION        0.1
+PROB_SHIFT              0.1
+PROB_SUBPERMUTATION     0.1
+PROB_CROSSING           0.8
+NSTEPS                  10000
+POP_SIZE                100
+NMIGR			800
+METRICS                 L2
+MIGRATION               1

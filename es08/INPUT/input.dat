@@ -1,0 +1,14 @@
+INITIAL_POS            0.0
+MU                     1.0
+SIGMA                  1.0
+DELTA                  1.0
+NBLOCKS                300
+NSTEPS                 500
+EQSTEPS                200
+TEMP                   4.0
+ANNEALSTEP_DIST        UNIFORM      1.0
+ANNEAL_NSTEPS          600
+COOLING_SCHEDULE       RATE_BETA         1.2
+MAX_BETA               50
+ENDINPUT
+ 	

@@ -1,0 +1,8 @@
+Number of cities = 34
+Population size = 100
+Crossing probability = 0.9
+Inversion probability = 0.1
+Permutation probability = 0.1
+Shift probability = 0.1
+Subpermutation probability = 0.1
+Number of evolution steps = 1000

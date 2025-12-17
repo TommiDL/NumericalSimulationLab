@@ -21,6 +21,8 @@ int main (int argc, char *argv[]){
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
+   // load first 2 numbers in primes file into complement seeds
+   // to generate a statistical indipendent new sequence read a new line of primes
    if (Primes.is_open()){
       Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
